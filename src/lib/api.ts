@@ -1,7 +1,7 @@
 import axios from 'axios';
 
-const ALPHA_VANTAGE_API_KEY = process.env.NEXT_PUBLIC_ALPHA_VANTAGE_API_KEY || 'demo';
-const EXCHANGE_RATE_API_KEY = process.env.NEXT_PUBLIC_EXCHANGE_RATE_API_KEY || 'demo';
+const ALPHA_VANTAGE_API_KEY = process.env.ALPHA_VANTAGE_API_KEY ?? 'demo';
+const EXCHANGE_RATE_API_KEY = process.env.EXCHANGE_RATE_API_KEY ?? 'demo';
 
 export interface StockQuote {
   symbol: string;
