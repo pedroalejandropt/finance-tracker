@@ -1,5 +1,5 @@
-import { ReactNode } from "react";
-import { Account, Stock, GlobalTotals } from "./index";
+import { ReactNode } from 'react';
+import { Account, Stock, GlobalTotals } from './index';
 
 export interface TabConfig {
   value: string;

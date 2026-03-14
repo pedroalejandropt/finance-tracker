@@ -7,23 +7,23 @@ export const authOptions: NextAuthOptions = {
       name: 'credentials',
       credentials: {
         email: { label: 'Email', type: 'email' },
-        password: { label: 'Password', type: 'password' }
+        password: { label: 'Password', type: 'password' },
       },
-      async authorize(credentials) {
+      async authorize() {
         // In production, this would verify against your database
         // if (credentials?.email === 'demo@financialtracker.com' && credentials?.password === 'demo123') {
-          return {
-            id: '1',
-            email: 'demo@financialtracker.com',
-            name: 'Demo User',
-          };
+        return {
+          id: '1',
+          email: 'demo@financialtracker.com',
+          name: 'Demo User',
+        };
         // }
         return null;
-      }
-    })
+      },
+    }),
   ],
   session: {
-    strategy: 'jwt'
+    strategy: 'jwt',
   },
   pages: {
     signIn: '/login',
@@ -40,6 +40,6 @@ export const authOptions: NextAuthOptions = {
         session.user.id = token.id as string;
       }
       return session;
-    }
-  }
+    },
+  },
 };

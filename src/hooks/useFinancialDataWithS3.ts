@@ -23,7 +23,7 @@ export function useFinancialDataWithS3() {
 
     try {
       setLoading(true);
-      
+
       // Load accounts
       const accountsData = await S3Storage.getUserData(session.user.id, 'accounts');
       if (accountsData) {
@@ -58,33 +58,33 @@ export function useFinancialDataWithS3() {
   const initializeSampleData = async () => {
     const sampleAccounts: Account[] = [
       {
-        id: '1',
+        accountId: '1',
         name: 'Checking Account',
         currency: 'USD',
-        balance: 15000.00,
-        type: 'bank'
+        balance: 15000.0,
+        type: 'bank',
       },
       {
-        id: '2',
+        accountId: '2',
         name: 'Savings Account',
         currency: 'USD',
-        balance: 45000.00,
-        type: 'bank'
+        balance: 45000.0,
+        type: 'bank',
       },
       {
-        id: '3',
+        accountId: '3',
         name: 'EUR Investment Account',
         currency: 'EUR',
-        balance: 25000.00,
-        type: 'investment'
+        balance: 25000.0,
+        type: 'investment',
       },
       {
-        id: '4',
+        accountId: '4',
         name: 'Crypto Wallet',
         currency: 'USD',
-        balance: 5000.00,
-        type: 'crypto'
-      }
+        balance: 5000.0,
+        type: 'crypto',
+      },
     ];
 
     const sampleStocks: Stock[] = [
@@ -92,9 +92,9 @@ export function useFinancialDataWithS3() {
         symbol: 'AAPL',
         name: 'Apple Inc.',
         shares: 50,
-        currentPrice: 175.50,
+        currentPrice: 175.5,
         currency: 'USD',
-        type: 'stock'
+        type: 'stock',
       },
       {
         symbol: 'GOOGL',
@@ -102,7 +102,7 @@ export function useFinancialDataWithS3() {
         shares: 20,
         currentPrice: 140.25,
         currency: 'USD',
-        type: 'stock'
+        type: 'stock',
       },
       {
         symbol: 'MSFT',
@@ -110,8 +110,8 @@ export function useFinancialDataWithS3() {
         shares: 30,
         currentPrice: 380.75,
         currency: 'USD',
-        type: 'stock'
-      }
+        type: 'stock',
+      },
     ];
 
     setAccounts(sampleAccounts);
@@ -132,10 +132,10 @@ export function useFinancialDataWithS3() {
         from: 'USD',
         to,
         rate,
-        timestamp: new Date()
+        timestamp: new Date(),
       }));
       setCurrencyRates(rates);
-      
+
       // Save currency rates to S3
       if (session?.user?.id) {
         await S3Storage.saveUserData(session.user.id, 'currency-rates', rates);
@@ -150,23 +150,23 @@ export function useFinancialDataWithS3() {
   const updateStockPrices = async () => {
     try {
       const updatedStocks = [];
-      
+
       // Process stocks sequentially to respect API rate limits
       for (const stock of stocks) {
         const quote = await StockAPI.getQuote(stock.symbol);
         updatedStocks.push({
           ...stock,
-          currentPrice: quote.price
+          currentPrice: quote.price,
         });
-        
+
         // Add delay to respect API rate limits (1 request per second)
         if (stocks.indexOf(stock) < stocks.length - 1) {
-          await new Promise(resolve => setTimeout(resolve, 1200)); // 1.2 seconds to be safe
+          await new Promise((resolve) => setTimeout(resolve, 1200)); // 1.2 seconds to be safe
         }
       }
-      
+
       setStocks(updatedStocks);
-      
+
       // Save updated stocks to S3
       if (session?.user?.id) {
         await S3Storage.saveUserData(session.user.id, 'stocks', updatedStocks);
@@ -230,42 +230,40 @@ export function useFinancialDataWithS3() {
   const addAccount = async (account: Omit<Account, 'id'>) => {
     const newAccount: Account = {
       ...account,
-      id: Date.now().toString()
+      accountId: Date.now().toString(),
     };
     setAccounts([...accounts, newAccount]);
   };
 
   // Update account
   const updateAccount = async (id: string, updates: Partial<Account>) => {
-    setAccounts(accounts.map(account => 
-      account.id === id ? { ...account, ...updates } : account
-    ));
+    setAccounts(
+      accounts.map((account) => (account.accountId === id ? { ...account, ...updates } : account))
+    );
   };
 
   // Delete account
   const deleteAccount = async (id: string) => {
-    setAccounts(accounts.filter(account => account.id !== id));
+    setAccounts(accounts.filter((account) => account.accountId !== id));
   };
 
   // Add new stock
   const addStock = async (stock: Omit<Stock, 'symbol'>) => {
     const newStock: Stock = {
       ...stock,
-      symbol: `STOCK_${Date.now()}`
+      symbol: `STOCK_${Date.now()}`,
     };
     setStocks([...stocks, newStock]);
   };
 
   // Update stock
   const updateStock = async (symbol: string, updates: Partial<Stock>) => {
-    setStocks(stocks.map(stock => 
-      stock.symbol === symbol ? { ...stock, ...updates } : stock
-    ));
+    setStocks(stocks.map((stock) => (stock.symbol === symbol ? { ...stock, ...updates } : stock)));
   };
 
   // Delete stock
   const deleteStock = async (symbol: string) => {
-    setStocks(stocks.filter(stock => stock.symbol !== symbol));
+    setStocks(stocks.filter((stock) => stock.symbol !== symbol));
   };
 
   return {
@@ -284,6 +282,6 @@ export function useFinancialDataWithS3() {
     addStock,
     updateStock,
     deleteStock,
-    updateStockPrices
+    updateStockPrices,
   };
 }

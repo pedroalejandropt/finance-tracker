@@ -34,7 +34,7 @@ export default function LoginPage() {
       } else {
         router.push('/');
       }
-    } catch (error) {
+    } catch {
       setError('An error occurred during login');
     } finally {
       setIsLoading(false);
@@ -83,7 +83,7 @@ export default function LoginPage() {
                   variant="ghost"
                   size="sm"
                   className="absolute right-0 top-0 h-full px-3 py-2 hover:bg-transparent"
-                  onClick={(e: React.MouseEvent<HTMLButtonElement>) => setShowPassword(!showPassword)}
+                  onClick={() => setShowPassword(!showPassword)}
                 >
                   {showPassword ? (
                     <EyeOffIcon className="h-4 w-4" />
@@ -93,9 +93,7 @@ export default function LoginPage() {
                 </Button>
               </div>
             </div>
-            {error && (
-              <div className="text-sm text-red-600 text-center">{error}</div>
-            )}
+            {error && <div className="text-sm text-red-600 text-center">{error}</div>}
             <Button variant="outline" type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Signing in...' : 'Sign in'}
             </Button>

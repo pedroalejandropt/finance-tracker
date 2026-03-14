@@ -18,6 +18,9 @@ test.describe('Dashboard', () => {
 
   test('can navigate to accounts tab', async ({ page }) => {
     await page.getByRole('tab', { name: /accounts/i }).click();
-    await expect(page.getByRole('tab', { name: /accounts/i })).toHaveAttribute('data-state', 'active');
+    await expect(page.getByRole('tab', { name: /accounts/i })).toHaveAttribute(
+      'data-state',
+      'active'
+    );
   });
 });

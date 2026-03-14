@@ -19,37 +19,46 @@ export function StockDistribution({ stocks, baseCurrency = 'USD' }: StockDistrib
   const { currencyRates } = useFinancialDataWithDynamo();
 
   // Group stocks by currency
-  const stocksByCurrency = stocks.reduce((acc, stock) => {
-    const currency = stock.currency || 'USD';
-    const totalValue = stock.shares * stock.currentPrice;
+  const stocksByCurrency = stocks.reduce(
+    (acc, stock) => {
+      const currency = stock.currency || 'USD';
+      const totalValue = stock.shares * stock.currentPrice;
 
-    if (!acc[currency]) {
-      acc[currency] = {
-        currency,
-        totalValue: 0,
-        stocks: []
-      };
-    }
+      if (!acc[currency]) {
+        acc[currency] = {
+          currency,
+          totalValue: 0,
+          stocks: [],
+        };
+      }
 
-    acc[currency].totalValue += totalValue;
-    acc[currency].stocks.push({
-      ...stock,
-      totalValue
-    });
+      acc[currency].totalValue += totalValue;
+      acc[currency].stocks.push({
+        ...stock,
+        totalValue,
+      });
 
-    return acc;
-  }, {} as Record<string, { currency: string; totalValue: number; stocks: (Stock & { totalValue: number })[] }>);
+      return acc;
+    },
+    {} as Record<
+      string,
+      { currency: string; totalValue: number; stocks: (Stock & { totalValue: number })[] }
+    >
+  );
 
   // Prepare data for currency distribution pie chart
-  const currencyData = Object.values(stocksByCurrency).map(item => ({
+  const currencyData = Object.values(stocksByCurrency).map((item) => ({
     name: item.currency,
     value: item.totalValue,
     currency: item.currency,
-    percentage: (item.totalValue / stocks.reduce((sum, stock) => sum + (stock.shares * stock.currentPrice), 0)) * 100
+    percentage:
+      (item.totalValue /
+        stocks.reduce((sum, stock) => sum + stock.shares * stock.currentPrice, 0)) *
+      100,
   }));
 
   // Prepare data for individual stock treemap
-  const stockTreemapData = stocks.map(stock => ({
+  const stockTreemapData = stocks.map((stock) => ({
     name: stock.symbol,
     size: stock.shares * stock.currentPrice,
     currency: stock.currency || 'USD',
@@ -57,51 +66,62 @@ export function StockDistribution({ stocks, baseCurrency = 'USD' }: StockDistrib
   }));
 
   // Prepare data for stock type distribution (Stocks vs ETFs)
-  const stockTypeData = stocks.reduce((acc, stock) => {
-    const type = stock.type.toUpperCase();
-    // include exchange calculation
-    const totalValue = stock.shares * stock.currentPrice * FinancialCalculator.getExchangeRate(currencyRates, stock.currency || 'USD', baseCurrency);
+  const stockTypeData = stocks.reduce(
+    (acc, stock) => {
+      const type = stock.type.toUpperCase();
+      // include exchange calculation
+      const totalValue =
+        stock.shares *
+        stock.currentPrice *
+        FinancialCalculator.getExchangeRate(currencyRates, stock.currency || 'USD', baseCurrency);
 
-    const existingType = acc.find(item => item.name === type);
-    if (existingType) {
-      existingType.value += totalValue;
-    } else {
+      const existingType = acc.find((item) => item.name === type);
+      if (existingType) {
+        existingType.value += totalValue;
+      } else {
+        acc.push({
+          name: type,
+          value: totalValue,
+          currency: baseCurrency,
+          percentage: 0,
+        });
+      }
+
+      return acc;
+    },
+    [] as { name: string; value: number; currency: string; percentage: number }[]
+  );
+
+  const stocksData = stocks.reduce(
+    (acc, stock) => {
+      // include exchange calculation
+      const totalValue =
+        stock.shares *
+        stock.currentPrice *
+        FinancialCalculator.getExchangeRate(currencyRates, stock.currency || 'USD', baseCurrency);
+
       acc.push({
-        name: type,
+        name: stock.symbol,
         value: totalValue,
         currency: baseCurrency,
-        percentage: 0
+        percentage: 0,
       });
-    }
-
-    return acc;
-  }, [] as { name: string; value: number; currency: string; percentage: number }[]);
-
-  const stocksData = stocks.reduce((acc, stock) => {
-    const type = stock.type.toUpperCase();
-    // include exchange calculation
-    const totalValue = stock.shares * stock.currentPrice * FinancialCalculator.getExchangeRate(currencyRates, stock.currency || 'USD', baseCurrency);
-
-    acc.push({
-      name: stock.symbol,
-      value: totalValue,
-      currency: baseCurrency,
-      percentage: 0
-    });
-    return acc;
-  }, [] as { name: string; value: number; currency: string; percentage: number }[]);
+      return acc;
+    },
+    [] as { name: string; value: number; currency: string; percentage: number }[]
+  );
 
   // Calculate percentages for stock types
-  const totalStockValue = stocks.reduce((sum, stock) => sum + (stock.shares * stock.currentPrice), 0);
-  stockTypeData.forEach(item => {
+  const totalStockValue = stocks.reduce((sum, stock) => sum + stock.shares * stock.currentPrice, 0);
+  stockTypeData.forEach((item) => {
     item.percentage = (item.value / totalStockValue) * 100;
   });
 
-  stocksData.forEach(item => {
+  stocksData.forEach((item) => {
     item.percentage = (item.value / totalStockValue) * 100;
   });
 
-  stockTreemapData.forEach(item => {
+  stockTreemapData.forEach((item) => {
     item.percentage = +((item.size / totalStockValue) * 100).toFixed(0);
   });
 
@@ -145,7 +165,9 @@ export function StockDistribution({ stocks, baseCurrency = 'USD' }: StockDistrib
               colors={COLORS}
               height={300}
               showLegend={true}
-              formatCurrency={(value, currency) => FinancialCalculator.formatCurrency(value, currency || baseCurrency)}
+              formatCurrency={(value, currency) =>
+                FinancialCalculator.formatCurrency(value, currency || baseCurrency)
+              }
             />
           </TabsContent>
 
@@ -158,7 +180,9 @@ export function StockDistribution({ stocks, baseCurrency = 'USD' }: StockDistrib
               colors={COLORS}
               height={400}
               baseCurrency={baseCurrency}
-              formatCurrency={(value, currency) => FinancialCalculator.formatCurrency(value, currency || baseCurrency)}
+              formatCurrency={(value, currency) =>
+                FinancialCalculator.formatCurrency(value, currency || baseCurrency)
+              }
             />
           </TabsContent>
 
@@ -172,7 +196,9 @@ export function StockDistribution({ stocks, baseCurrency = 'USD' }: StockDistrib
               height={300}
               showLegend={true}
               baseCurrency={baseCurrency}
-              formatCurrency={(value, currency) => FinancialCalculator.formatCurrency(value, currency || baseCurrency)}
+              formatCurrency={(value, currency) =>
+                FinancialCalculator.formatCurrency(value, currency || baseCurrency)
+              }
             />
           </TabsContent>
 
@@ -182,11 +208,23 @@ export function StockDistribution({ stocks, baseCurrency = 'USD' }: StockDistrib
             </div>
             <CustomPieChart
               data={stocksData}
-              colors={['#0088FE', '#00C49F', '#FFBB28', '#FF8042', '#8884D8', '#82CA9D', '#9f82caff', '#ca8282ff', '#c5ca82ff']}
+              colors={[
+                '#0088FE',
+                '#00C49F',
+                '#FFBB28',
+                '#FF8042',
+                '#8884D8',
+                '#82CA9D',
+                '#9f82caff',
+                '#ca8282ff',
+                '#c5ca82ff',
+              ]}
               height={300}
               showLegend={true}
               baseCurrency={baseCurrency}
-              formatCurrency={(value, currency) => FinancialCalculator.formatCurrency(value, currency || baseCurrency)}
+              formatCurrency={(value, currency) =>
+                FinancialCalculator.formatCurrency(value, currency || baseCurrency)
+              }
             />
           </TabsContent>
         </Tabs>

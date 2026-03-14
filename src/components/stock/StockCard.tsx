@@ -32,17 +32,17 @@ export function StockCard({ stock, previousPrice, onEdit, onDelete }: StockCardP
   };
 
   const getInvestmentColor = (type: Stock['type']) => {
-      switch (type) {
-        case 'stock':
-          return 'bg-blue-100 text-blue-800';
-        case 'etf':
-          return 'bg-green-100 text-green-800';
-        case 'crypto':
-          return 'bg-purple-100 text-purple-800';
-        default:
-          return 'bg-gray-100 text-gray-800';
-      }
-    };
+    switch (type) {
+      case 'stock':
+        return 'bg-blue-100 text-blue-800';
+      case 'etf':
+        return 'bg-green-100 text-green-800';
+      case 'crypto':
+        return 'bg-purple-100 text-purple-800';
+      default:
+        return 'bg-gray-100 text-gray-800';
+    }
+  };
 
   return (
     <Card className="hover:shadow-lg transition-shadow">
@@ -80,8 +80,8 @@ export function StockCard({ stock, previousPrice, onEdit, onDelete }: StockCardP
               <div className="flex items-center space-x-1">
                 {getChangeIcon()}
                 <span className={`text-sm font-medium ${getChangeColor()}`}>
-                  {FinancialCalculator.formatCurrency(change, stock.currency)} 
-                  ({changePercent.toFixed(2)}%)
+                  {FinancialCalculator.formatCurrency(change, stock.currency)}(
+                  {changePercent.toFixed(2)}%)
                 </span>
               </div>
             </div>
@@ -90,20 +90,15 @@ export function StockCard({ stock, previousPrice, onEdit, onDelete }: StockCardP
         {(onEdit || onDelete) && (
           <div className="flex space-x-2 pt-2 border-t">
             {onEdit && (
-              <Button 
-                variant="outline" 
-                size="sm" 
-                onClick={() => onEdit(stock)}
-                className="flex-1"
-              >
+              <Button variant="outline" size="sm" onClick={() => onEdit(stock)} className="flex-1">
                 <EditIcon className="h-4 w-4 mr-1" />
                 Edit
               </Button>
             )}
             {onDelete && (
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => onDelete(stock.symbol)}
                 className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
               >

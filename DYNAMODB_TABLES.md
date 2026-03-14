@@ -1,6 +1,7 @@
 # DynamoDB Table Structure for Financial Tracker
 
 ## Overview
+
 This document outlines the recommended DynamoDB table structure for the financial tracker application.
 
 ## Tables
@@ -10,6 +11,7 @@ This document outlines the recommended DynamoDB table structure for the financia
 **Primary Key:** `userId` (String)
 
 **Attributes:**
+
 - `userId` (String) - Primary Key
 - `email` (String) - User email address
 - `name` (String) - User display name
@@ -17,6 +19,7 @@ This document outlines the recommended DynamoDB table structure for the financia
 - `updatedAt` (String) - ISO timestamp
 
 **Example Item:**
+
 ```json
 {
   "userId": "user_123",
@@ -32,10 +35,12 @@ This document outlines the recommended DynamoDB table structure for the financia
 **Primary Key:** `id` (String)
 
 **Global Secondary Index (GSI):**
+
 - **Index Name:** `userId-index`
 - **Partition Key:** `userId` (String)
 
 **Attributes:**
+
 - `id` (String) - Primary Key, unique account identifier
 - `userId` (String) - Foreign key to Users table
 - `name` (String) - Account name
@@ -46,13 +51,14 @@ This document outlines the recommended DynamoDB table structure for the financia
 - `updatedAt` (String) - ISO timestamp
 
 **Example Item:**
+
 ```json
 {
   "id": "acc_123",
   "userId": "user_123",
   "name": "Checking Account",
   "currency": "USD",
-  "balance": 15000.00,
+  "balance": 15000.0,
   "type": "bank",
   "createdAt": "2024-01-01T00:00:00.000Z",
   "updatedAt": "2024-01-01T00:00:00.000Z"
@@ -64,10 +70,12 @@ This document outlines the recommended DynamoDB table structure for the financia
 **Primary Key:** `symbol` (String)
 
 **Global Secondary Index (GSI):**
+
 - **Index Name:** `userId-index`
 - **Partition Key:** `userId` (String)
 
 **Attributes:**
+
 - `symbol` (String) - Primary Key, stock symbol
 - `userId` (String) - Foreign key to Users table
 - `name` (String) - Company name
@@ -79,13 +87,14 @@ This document outlines the recommended DynamoDB table structure for the financia
 - `updatedAt` (String) - ISO timestamp
 
 **Example Item:**
+
 ```json
 {
   "symbol": "AAPL",
   "userId": "user_123",
   "name": "Apple Inc.",
   "shares": 100,
-  "currentPrice": 150.00,
+  "currentPrice": 150.0,
   "currency": "USD",
   "type": "stock",
   "createdAt": "2024-01-01T00:00:00.000Z",
@@ -99,6 +108,7 @@ This document outlines the recommended DynamoDB table structure for the financia
 **Sort Key:** `toCurrency#timestamp` (String)
 
 **Attributes:**
+
 - `fromCurrency` (String) - Base currency (Partition Key)
 - `toCurrency#timestamp` (String) - Target currency + timestamp (Sort Key)
 - `from` (String) - Base currency code
@@ -107,6 +117,7 @@ This document outlines the recommended DynamoDB table structure for the financia
 - `timestamp` (String) - ISO timestamp
 
 **Example Item:**
+
 ```json
 {
   "fromCurrency": "USD",
@@ -121,6 +132,7 @@ This document outlines the recommended DynamoDB table structure for the financia
 ## AWS CLI Commands to Create Tables
 
 ### Users Table
+
 ```bash
 aws dynamodb create-table \
   --table-name finance-tracker-users \
@@ -131,6 +143,7 @@ aws dynamodb create-table \
 ```
 
 ### Accounts Table
+
 ```bash
 aws dynamodb create-table \
   --table-name finance-tracker-accounts \
@@ -150,6 +163,7 @@ aws dynamodb create-table \
 ```
 
 ### Stocks Table
+
 ```bash
 aws dynamodb create-table \
   --table-name finance-tracker-stocks \
@@ -169,6 +183,7 @@ aws dynamodb create-table \
 ```
 
 ### Currency Rates Table
+
 ```bash
 aws dynamodb create-table \
   --table-name finance-tracker-rates \
@@ -198,6 +213,7 @@ AWS_DYNAMODB_RATES_TABLE=finance-tracker-rates
 ## Data Access Patterns
 
 ### Get all accounts for a user
+
 ```javascript
 // Uses GSI: userId-index
 const params = {
@@ -205,12 +221,13 @@ const params = {
   IndexName: 'userId-index',
   KeyConditionExpression: 'userId = :userId',
   ExpressionAttributeValues: {
-    ':userId': userId
-  }
+    ':userId': userId,
+  },
 };
 ```
 
 ### Get all stocks for a user
+
 ```javascript
 // Uses GSI: userId-index
 const params = {
@@ -218,20 +235,21 @@ const params = {
   IndexName: 'userId-index',
   KeyConditionExpression: 'userId = :userId',
   ExpressionAttributeValues: {
-    ':userId': userId
-  }
+    ':userId': userId,
+  },
 };
 ```
 
 ### Get currency rates for a base currency
+
 ```javascript
 // Uses composite key
 const params = {
   TableName: 'finance-tracker-rates',
   KeyConditionExpression: 'fromCurrency = :fromCurrency',
   ExpressionAttributeValues: {
-    ':fromCurrency': 'USD'
-  }
+    ':fromCurrency': 'USD',
+  },
 };
 ```
 
