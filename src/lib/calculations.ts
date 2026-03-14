@@ -39,7 +39,6 @@ export class FinancialCalculator {
       const currency = stock.currency;
       const stockValue = stock.shares * stock.currentPrice;
       const rate = this.getExchangeRate(currencyRates, currency, targetCurrency);
-      console.log('rate', rate);
       const valueInUSD = stockValue * rate;
 
       if (!currencyMap.has(currency)) {
@@ -90,9 +89,6 @@ export class FinancialCalculator {
     fromCurrency: string,
     toCurrency: string
   ): number {
-    console.log('currencyRates', currencyRates);
-    console.log('fromCurrency', fromCurrency);
-    console.log('toCurrency', toCurrency);
     if (fromCurrency === toCurrency) return 1;
 
     // Find direct rate
