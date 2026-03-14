@@ -14,20 +14,26 @@ import {
 } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
 
-// DynamoDB client
-const dynamoClient = new DynamoDBClient({
-  region: process.env.AWS_REGION ?? 'us-east-1',
-  credentials: {
-    accessKeyId: process.env.AWS_ACCESS_KEY_ID!,
-    secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY!,
-  },
-});
+// DynamoDB client — lazily created so missing env vars don't crash the module at load time
+let _dynamoClient: DynamoDBClient | null = null;
+function getDynamoClient(): DynamoDBClient {
+  if (!_dynamoClient) {
+    _dynamoClient = new DynamoDBClient({
+      region: process.env.AWS_REGION || 'us-east-1',
+      credentials: {
+        accessKeyId: process.env.AWS_ACCESS_KEY_ID || '',
+        secretAccessKey: process.env.AWS_SECRET_ACCESS_KEY || '',
+      },
+    });
+  }
+  return _dynamoClient;
+}
 
 // Table names
-const USERS_TABLE = process.env.AWS_DYNAMODB_USERS_TABLE ?? 'finance-tracker-users';
-const ACCOUNTS_TABLE = process.env.AWS_DYNAMODB_ACCOUNTS_TABLE ?? 'finance-tracker-accounts';
-const STOCKS_TABLE = process.env.AWS_DYNAMODB_STOCKS_TABLE ?? 'finance-tracker-stocks';
-const RATES_TABLE = process.env.AWS_DYNAMODB_RATES_TABLE ?? 'finance-tracker-rates';
+const USERS_TABLE = process.env.AWS_DYNAMODB_USERS_TABLE || 'finance-tracker-users';
+const ACCOUNTS_TABLE = process.env.AWS_DYNAMODB_ACCOUNTS_TABLE || 'finance-tracker-accounts';
+const STOCKS_TABLE = process.env.AWS_DYNAMODB_STOCKS_TABLE || 'finance-tracker-stocks';
+const RATES_TABLE = process.env.AWS_DYNAMODB_RATES_TABLE || 'finance-tracker-rates';
 
 // DynamoDB types (for future implementation)
 
@@ -60,7 +66,7 @@ export function useFinancialDataWithDynamo() {
           }),
         });
 
-        const response = await dynamoClient.send(command);
+        const response = await getDynamoClient().send(command);
         if (response.Item) {
           return unmarshall(response.Item) as DynamoDBUser;
         }
@@ -87,7 +93,7 @@ export function useFinancialDataWithDynamo() {
           Item: marshall(newUser),
         });
 
-        await dynamoClient.send(command);
+        await getDynamoClient().send(command);
         return newUser;
       } catch (error) {
         console.error('Error creating user in DynamoDB:', error);
@@ -127,7 +133,7 @@ export function useFinancialDataWithDynamo() {
           }),
         });
 
-        await dynamoClient.send(command);
+        await getDynamoClient().send(command);
         return updatedUser;
       } catch (error) {
         console.error('Error updating user in DynamoDB:', error);
@@ -147,7 +153,7 @@ export function useFinancialDataWithDynamo() {
           }),
         });
 
-        const response = await dynamoClient.send(command);
+        const response = await getDynamoClient().send(command);
         if (response.Items) {
           return response.Items.map((item: any) => unmarshall(item) as Account);
         }
@@ -171,7 +177,7 @@ export function useFinancialDataWithDynamo() {
           }),
         });
 
-        await dynamoClient.send(command);
+        await getDynamoClient().send(command);
       } catch (error) {
         console.error('Error saving account to DynamoDB:', error);
         throw error;
@@ -188,7 +194,7 @@ export function useFinancialDataWithDynamo() {
           }),
         });
 
-        await dynamoClient.send(command);
+        await getDynamoClient().send(command);
       } catch (error) {
         console.error('Error deleting account from DynamoDB:', error);
         throw error;
@@ -207,7 +213,7 @@ export function useFinancialDataWithDynamo() {
           }),
         });
 
-        const response = await dynamoClient.send(command);
+        const response = await getDynamoClient().send(command);
         if (response.Items) {
           return response.Items.map((item: any) => unmarshall(item) as Stock);
         }
@@ -231,7 +237,7 @@ export function useFinancialDataWithDynamo() {
           }),
         });
 
-        await dynamoClient.send(command);
+        await getDynamoClient().send(command);
       } catch (error) {
         console.error('Error saving stock to DynamoDB:', error);
         throw error;
@@ -248,7 +254,7 @@ export function useFinancialDataWithDynamo() {
           }),
         });
 
-        await dynamoClient.send(command);
+        await getDynamoClient().send(command);
       } catch (error) {
         console.error('Error deleting stock from DynamoDB:', error);
         throw error;
@@ -269,7 +275,7 @@ export function useFinancialDataWithDynamo() {
           }),
         });
 
-        const response = await dynamoClient.send(command);
+        const response = await getDynamoClient().send(command);
         if (response.Items) {
           return response.Items.map((item: any) => unmarshall(item) as CurrencyRate);
         }
@@ -293,7 +299,7 @@ export function useFinancialDataWithDynamo() {
           }),
         });
 
-        await dynamoClient.send(command);
+        await getDynamoClient().send(command);
       } catch (error) {
         console.error('Error saving currency rate to DynamoDB:', error);
         // Don't throw error, just log it for now

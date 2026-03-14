@@ -58,28 +58,28 @@ export function useFinancialDataWithS3() {
   const initializeSampleData = async () => {
     const sampleAccounts: Account[] = [
       {
-        id: '1',
+        accountId: '1',
         name: 'Checking Account',
         currency: 'USD',
         balance: 15000.0,
         type: 'bank',
       },
       {
-        id: '2',
+        accountId: '2',
         name: 'Savings Account',
         currency: 'USD',
         balance: 45000.0,
         type: 'bank',
       },
       {
-        id: '3',
+        accountId: '3',
         name: 'EUR Investment Account',
         currency: 'EUR',
         balance: 25000.0,
         type: 'investment',
       },
       {
-        id: '4',
+        accountId: '4',
         name: 'Crypto Wallet',
         currency: 'USD',
         balance: 5000.0,
@@ -230,7 +230,7 @@ export function useFinancialDataWithS3() {
   const addAccount = async (account: Omit<Account, 'id'>) => {
     const newAccount: Account = {
       ...account,
-      id: Date.now().toString(),
+      accountId: Date.now().toString(),
     };
     setAccounts([...accounts, newAccount]);
   };
@@ -238,13 +238,13 @@ export function useFinancialDataWithS3() {
   // Update account
   const updateAccount = async (id: string, updates: Partial<Account>) => {
     setAccounts(
-      accounts.map((account) => (account.id === id ? { ...account, ...updates } : account))
+      accounts.map((account) => (account.accountId === id ? { ...account, ...updates } : account))
     );
   };
 
   // Delete account
   const deleteAccount = async (id: string) => {
-    setAccounts(accounts.filter((account) => account.id !== id));
+    setAccounts(accounts.filter((account) => account.accountId !== id));
   };
 
   // Add new stock
