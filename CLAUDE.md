@@ -36,8 +36,6 @@ The primary data hook is `useFinancialDataWithDynamo` (`src/hooks/useFinancialDa
 
 `useFinancialData` (`src/hooks/useFinancialData.ts`) is a legacy hook using only mock/sample data — kept for offline/testing use.
 
-`useFinancialDataWithS3` is present but unused.
-
 ### DynamoDB Tables
 
 Documented in `DYNAMODB_TABLES.md`. Four tables, all `PAY_PER_REQUEST`:
@@ -95,10 +93,6 @@ ALPHA_VANTAGE_API_KEY
 EXCHANGE_RATE_API_KEY
 ```
 
-> **Note**: `useFinancialDataWithDynamo.ts` currently has hardcoded AWS credential fallbacks. These must be removed and replaced with env vars only.
-
 ## Known Issues
 
-- `userId` is hardcoded as `'current-user'` in the DynamoDB hook — should come from `session.user.id`
 - Prisma is declared as a dependency but not actively used
-- `useFinancialDataWithS3` is unused and can be removed
