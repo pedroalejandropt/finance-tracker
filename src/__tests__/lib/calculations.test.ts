@@ -13,8 +13,22 @@ const mockAccounts: Account[] = [
 ];
 
 const mockStocks: Stock[] = [
-  { symbol: 'AAPL', name: 'Apple Inc', shares: 10, currentPrice: 150, currency: 'USD', type: 'stock' },
-  { symbol: 'VOW', name: 'Volkswagen', shares: 5, currentPrice: 120, currency: 'EUR', type: 'stock' },
+  {
+    symbol: 'AAPL',
+    name: 'Apple Inc',
+    shares: 10,
+    currentPrice: 150,
+    currency: 'USD',
+    type: 'stock',
+  },
+  {
+    symbol: 'VOW',
+    name: 'Volkswagen',
+    shares: 5,
+    currentPrice: 120,
+    currency: 'EUR',
+    type: 'stock',
+  },
 ];
 
 describe('FinancialCalculator', () => {
@@ -86,7 +100,7 @@ describe('FinancialCalculator', () => {
         [],
         mockCurrencyRates
       );
-      const currencies = result.map(r => r.currency);
+      const currencies = result.map((r) => r.currency);
       expect(currencies).toContain('USD');
       expect(currencies).toContain('EUR');
     });
@@ -97,7 +111,7 @@ describe('FinancialCalculator', () => {
         { accountId: 'a2', name: 'B', currency: 'USD', balance: 300, type: 'bank' },
       ];
       const result = FinancialCalculator.calculateTotalsByCurrency(accounts, [], []);
-      const usdTotals = result.find(r => r.currency === 'USD');
+      const usdTotals = result.find((r) => r.currency === 'USD');
       expect(usdTotals).toBeDefined();
       expect(usdTotals?.totalInCurrency).toBe(800);
       expect(usdTotals?.totalInUSD).toBe(800);
@@ -107,12 +121,8 @@ describe('FinancialCalculator', () => {
       const accounts: Account[] = [
         { accountId: 'e1', name: 'EU', currency: 'EUR', balance: 100, type: 'bank' },
       ];
-      const result = FinancialCalculator.calculateTotalsByCurrency(
-        accounts,
-        [],
-        mockCurrencyRates
-      );
-      const eurTotals = result.find(r => r.currency === 'EUR');
+      const result = FinancialCalculator.calculateTotalsByCurrency(accounts, [], mockCurrencyRates);
+      const eurTotals = result.find((r) => r.currency === 'EUR');
       expect(eurTotals?.totalInCurrency).toBe(100);
       expect(eurTotals?.totalInUSD).toBeCloseTo(110, 5);
     });
@@ -123,7 +133,7 @@ describe('FinancialCalculator', () => {
         mockStocks,
         mockCurrencyRates
       );
-      const usdTotals = result.find(r => r.currency === 'USD');
+      const usdTotals = result.find((r) => r.currency === 'USD');
       // AAPL: 10 shares * $150 = $1500
       expect(usdTotals?.totalInCurrency).toBe(1500);
       expect(usdTotals?.stocks).toHaveLength(1);
@@ -141,7 +151,7 @@ describe('FinancialCalculator', () => {
         [],
         mockCurrencyRates
       );
-      const usdTotals = result.find(r => r.currency === 'USD');
+      const usdTotals = result.find((r) => r.currency === 'USD');
       expect(usdTotals?.accounts).toHaveLength(1);
       expect(usdTotals?.accounts[0].accountId).toBe('acc1');
     });

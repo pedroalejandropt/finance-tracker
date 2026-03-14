@@ -11,7 +11,7 @@ const OverviewTab: React.FC<TabComponentProps> = ({
   totals,
   stocks = [],
   baseCurrency,
-  onCurrencyChange
+  onCurrencyChange,
 }) => (
   <div className="space-y-6">
     {totals && (
@@ -21,12 +21,7 @@ const OverviewTab: React.FC<TabComponentProps> = ({
         onCurrencyChange={onCurrencyChange}
       />
     )}
-    {stocks.length > 0 && (
-      <StockDistribution
-        stocks={stocks}
-        baseCurrency={baseCurrency}
-      />
-    )}
+    {stocks.length > 0 && <StockDistribution stocks={stocks} baseCurrency={baseCurrency} />}
   </div>
 );
 
@@ -35,13 +30,17 @@ const AccountsTab: React.FC<TabComponentProps> = ({
   totals,
   onEditAccount,
   onDeleteAccount,
-  onAddAccount
+  onAddAccount,
 }) => (
   <div className="space-y-6">
     <div className="flex justify-between items-center">
       <h2 className="text-xl font-semibold">Accounts</h2>
       {onAddAccount && (
-        <Button variant="outline" onClick={onAddAccount} className="flex items-center space-x-2 px-4 py-2 text-white rounded-lg">
+        <Button
+          variant="outline"
+          onClick={onAddAccount}
+          className="flex items-center space-x-2 px-4 py-2 text-white rounded-lg"
+        >
           <PlusIcon className="h-4 w-4" />
           <span>Add Account</span>
         </Button>
@@ -53,9 +52,10 @@ const AccountsTab: React.FC<TabComponentProps> = ({
         <AccountCard
           key={account.accountId}
           account={account}
-          totalInUSD={totals?.totalsByCurrency.find(
-            total => total.currency === account.currency
-          )?.totalInUSD || 0}
+          totalInUSD={
+            totals?.totalsByCurrency.find((total) => total.currency === account.currency)
+              ?.totalInUSD || 0
+          }
           onEdit={onEditAccount}
           onDelete={onDeleteAccount}
         />
@@ -68,13 +68,17 @@ const StocksTab: React.FC<TabComponentProps> = ({
   stocks = [],
   onEditStock,
   onDeleteStock,
-  onAddStock
+  onAddStock,
 }) => (
   <div className="space-y-6">
     <div className="flex justify-between items-center">
       <h2 className="text-xl font-semibold">Stock Portfolio</h2>
       {onAddStock && (
-        <Button variant="outline" onClick={onAddStock} className="flex items-center space-x-2 px-4 py-2 text-white rounded-lg">
+        <Button
+          variant="outline"
+          onClick={onAddStock}
+          className="flex items-center space-x-2 px-4 py-2 text-white rounded-lg"
+        >
           <PlusIcon className="h-4 w-4" />
           <span>Add Stock</span>
         </Button>
@@ -83,32 +87,9 @@ const StocksTab: React.FC<TabComponentProps> = ({
 
     <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
       {stocks.map((stock) => (
-        <StockCard
-          key={stock.symbol}
-          stock={stock}
-          onEdit={onEditStock}
-          onDelete={onDeleteStock}
-        />
+        <StockCard key={stock.symbol} stock={stock} onEdit={onEditStock} onDelete={onDeleteStock} />
       ))}
     </div>
-  </div>
-);
-
-const StockAnalysisTab: React.FC<TabComponentProps> = ({
-  stocks = [],
-  baseCurrency
-}) => (
-  <div className="space-y-6">
-    {stocks.length > 0 ? (
-      <StockDistribution
-        stocks={stocks}
-        baseCurrency={baseCurrency}
-      />
-    ) : (
-      <div className="text-center py-12">
-        <p className="text-gray-500">No stocks available for analysis</p>
-      </div>
-    )}
   </div>
 );
 
@@ -117,7 +98,7 @@ export const getTabConfigs = (): TabConfig[] => [
   {
     value: 'overview',
     label: 'Overview',
-    component: OverviewTab
+    component: OverviewTab,
   },
   {
     value: 'accounts',
@@ -142,8 +123,6 @@ export const getTabConfigs = (): TabConfig[] => [
 // Hook para filtrar tabs basado en condiciones
 export const useVisibleTabs = (props: TabComponentProps): TabConfig[] => {
   const allTabs = getTabConfigs();
-  
-  return allTabs.filter(tab => 
-    !tab.showCondition || tab.showCondition(props)
-  );
+
+  return allTabs.filter((tab) => !tab.showCondition || tab.showCondition(props));
 };

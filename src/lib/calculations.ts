@@ -10,7 +10,7 @@ export class FinancialCalculator {
     const currencyMap = new Map<string, TotalsByCurrency>();
 
     // Process accounts
-    accounts.forEach(account => {
+    accounts.forEach((account) => {
       const currency = account.currency;
       const rate = this.getExchangeRate(currencyRates, currency, targetCurrency);
       const amountInUSD = account.balance * rate;
@@ -21,7 +21,7 @@ export class FinancialCalculator {
           totalInCurrency: 0,
           totalInUSD: 0,
           accounts: [],
-          stocks: []
+          stocks: [],
         });
       }
 
@@ -30,12 +30,12 @@ export class FinancialCalculator {
       totals.totalInUSD += amountInUSD;
       totals.accounts.push({
         accountId: account.accountId,
-        amount: account.balance
+        amount: account.balance,
       });
     });
 
     // Process stocks
-    stocks.forEach(stock => {
+    stocks.forEach((stock) => {
       const currency = stock.currency;
       const stockValue = stock.shares * stock.currentPrice;
       const rate = this.getExchangeRate(currencyRates, currency, targetCurrency);
@@ -48,7 +48,7 @@ export class FinancialCalculator {
           totalInCurrency: 0,
           totalInUSD: 0,
           accounts: [],
-          stocks: []
+          stocks: [],
         });
       }
 
@@ -57,7 +57,7 @@ export class FinancialCalculator {
       totals.totalInUSD += valueInUSD;
       totals.stocks.push({
         symbol: stock.symbol,
-        value: stockValue
+        value: stockValue,
       });
     });
 
@@ -81,7 +81,7 @@ export class FinancialCalculator {
 
     return {
       totalUSD,
-      totalsByCurrency
+      totalsByCurrency,
     };
   }
 
@@ -97,24 +97,22 @@ export class FinancialCalculator {
 
     // Find direct rate
     const directRate = currencyRates.find(
-      rate => rate.from === fromCurrency && rate.to === toCurrency
+      (rate) => rate.from === fromCurrency && rate.to === toCurrency
     );
     if (directRate) return directRate.rate;
 
     // Try inverse rate
     const inverseRate = currencyRates.find(
-      rate => rate.from === toCurrency && rate.to === fromCurrency
+      (rate) => rate.from === toCurrency && rate.to === fromCurrency
     );
     if (inverseRate) return 1 / inverseRate.rate;
 
     // Try USD as intermediary
     if (fromCurrency !== 'USD' && toCurrency !== 'USD') {
       const fromToUSD = currencyRates.find(
-        rate => rate.from === fromCurrency && rate.to === 'USD'
+        (rate) => rate.from === fromCurrency && rate.to === 'USD'
       );
-      const usdToTo = currencyRates.find(
-        rate => rate.from === 'USD' && rate.to === toCurrency
-      );
+      const usdToTo = currencyRates.find((rate) => rate.from === 'USD' && rate.to === toCurrency);
       if (fromToUSD && usdToTo) {
         return fromToUSD.rate * usdToTo.rate;
       }
@@ -129,7 +127,7 @@ export class FinancialCalculator {
       style: 'currency',
       currency: currency,
       minimumFractionDigits: 2,
-      maximumFractionDigits: 2
+      maximumFractionDigits: 2,
     }).format(amount);
   }
 
@@ -139,8 +137,7 @@ export class FinancialCalculator {
   ): { change: number; changePercent: number } {
     const change = currentTotal - previousTotal;
     const changePercent = previousTotal !== 0 ? (change / previousTotal) * 100 : 0;
-    
+
     return { change, changePercent };
   }
 }
-

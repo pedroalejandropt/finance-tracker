@@ -5,7 +5,13 @@ import { Stock } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { XIcon } from 'lucide-react';
 
@@ -22,7 +28,7 @@ export function StockForm({ stock, onSubmit, onCancel }: StockFormProps) {
     shares: stock?.shares || 0,
     currentPrice: stock?.currentPrice || 0,
     currency: stock?.currency || 'USD',
-    type: stock?.type || 'stock'
+    type: stock?.type || 'stock',
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -39,7 +45,7 @@ export function StockForm({ stock, onSubmit, onCancel }: StockFormProps) {
     { value: 'AUD', label: 'AUD - Australian Dollar' },
     { value: 'CHF', label: 'CHF - Swiss Franc' },
     { value: 'CNY', label: 'CNY - Chinese Yuan' },
-    { value: 'INR', label: 'INR - Indian Rupee' }
+    { value: 'INR', label: 'INR - Indian Rupee' },
   ];
 
   const types = [
@@ -93,7 +99,9 @@ export function StockForm({ stock, onSubmit, onCancel }: StockFormProps) {
               type="number"
               step="0.01"
               value={formData.shares}
-              onChange={(e) => setFormData({ ...formData, shares: parseFloat(e.target.value) || 0 })}
+              onChange={(e) =>
+                setFormData({ ...formData, shares: parseFloat(e.target.value) || 0 })
+              }
               placeholder="0"
               required
             />
@@ -106,7 +114,9 @@ export function StockForm({ stock, onSubmit, onCancel }: StockFormProps) {
               type="number"
               step="0.01"
               value={formData.currentPrice}
-              onChange={(e) => setFormData({ ...formData, currentPrice: parseFloat(e.target.value) || 0 })}
+              onChange={(e) =>
+                setFormData({ ...formData, currentPrice: parseFloat(e.target.value) || 0 })
+              }
               placeholder="0.00"
               required
             />
@@ -114,7 +124,10 @@ export function StockForm({ stock, onSubmit, onCancel }: StockFormProps) {
 
           <div className="space-y-2">
             <Label htmlFor="currency">Type</Label>
-            <Select value={formData.type} onValueChange={(value: string) => setFormData({ ...formData, type: value })}>
+            <Select
+              value={formData.type}
+              onValueChange={(value: string) => setFormData({ ...formData, type: value })}
+            >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select type" />
               </SelectTrigger>
@@ -130,9 +143,9 @@ export function StockForm({ stock, onSubmit, onCancel }: StockFormProps) {
 
           <div className="space-y-2">
             <Label htmlFor="currency">Currency</Label>
-            <Select 
-              value={formData.currency} 
-              onValueChange={(value: string) => setFormData({ ...formData, currency: value })}  
+            <Select
+              value={formData.currency}
+              onValueChange={(value: string) => setFormData({ ...formData, currency: value })}
             >
               <SelectTrigger className="w-full">
                 <SelectValue placeholder="Select currency" />

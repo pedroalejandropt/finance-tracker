@@ -5,7 +5,13 @@ import { Account } from '@/types';
 import { Button } from '@/components/ui/button';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { Select, SelectContent, SelectItem, SelectTrigger, SelectValue } from '@/components/ui/select';
+import {
+  Select,
+  SelectContent,
+  SelectItem,
+  SelectTrigger,
+  SelectValue,
+} from '@/components/ui/select';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { XIcon } from 'lucide-react';
 
@@ -27,7 +33,7 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
     name: account?.name || '',
     currency: account?.currency || 'USD',
     balance: account?.balance || 0,
-    type: account?.type || 'bank' as Account['type']
+    type: account?.type || ('bank' as Account['type']),
   });
 
   const handleSubmit = (e: React.FormEvent) => {
@@ -44,14 +50,14 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
     { value: 'AUD', label: 'AUD - Australian Dollar' },
     { value: 'CHF', label: 'CHF - Swiss Franc' },
     { value: 'CNY', label: 'CNY - Chinese Yuan' },
-    { value: 'INR', label: 'INR - Indian Rupee' }
+    { value: 'INR', label: 'INR - Indian Rupee' },
   ];
 
   const accountTypes = [
     { value: 'bank', label: 'Bank Account' },
     { value: 'investment', label: 'Investment Account' },
     { value: 'crypto', label: 'Crypto Wallet' },
-    { value: 'cash', label: 'Cash' }
+    { value: 'cash', label: 'Cash' },
   ];
 
   return (
@@ -84,7 +90,10 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
 
           <div className="space-y-2">
             <Label htmlFor="type">Account Type</Label>
-            <Select value={formData.type} onValueChange={(value: Account['type']) => setFormData({ ...formData, type: value })}>
+            <Select
+              value={formData.type}
+              onValueChange={(value: Account['type']) => setFormData({ ...formData, type: value })}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select account type" />
               </SelectTrigger>
@@ -100,7 +109,10 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
 
           <div className="space-y-2">
             <Label htmlFor="currency">Currency</Label>
-            <Select value={formData.currency} onValueChange={(value) => setFormData({ ...formData, currency: value })}>
+            <Select
+              value={formData.currency}
+              onValueChange={(value) => setFormData({ ...formData, currency: value })}
+            >
               <SelectTrigger>
                 <SelectValue placeholder="Select currency" />
               </SelectTrigger>
@@ -121,7 +133,9 @@ export function AccountForm({ account, onSubmit, onCancel }: AccountFormProps) {
               type="number"
               step="0.01"
               value={formData.balance}
-              onChange={(e) => setFormData({ ...formData, balance: parseFloat(e.target.value) || 0 })}
+              onChange={(e) =>
+                setFormData({ ...formData, balance: parseFloat(e.target.value) || 0 })
+              }
               placeholder="0.00"
               required
             />

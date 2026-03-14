@@ -1,20 +1,22 @@
 'use client';
 
-import { 
-  WalletIcon, 
-  RefreshCwIcon, 
-} from 'lucide-react';
+import { useEffect } from 'react';
+import { WalletIcon, RefreshCwIcon } from 'lucide-react';
 import { useSession } from 'next-auth/react';
+import { useRouter } from 'next/navigation';
 import { Button } from '@/components/ui/button';
 import { useFinancialDataWithDynamo } from '@/hooks/useFinancialDataWithDynamo';
 
 export default function Home() {
   const { data: session, status } = useSession();
-  const {
-    loading,
-    error,
-    // refreshData,
-  } = useFinancialDataWithDynamo();
+  const { loading, error } = useFinancialDataWithDynamo();
+  const router = useRouter();
+
+  useEffect(() => {
+    if (status === 'authenticated') {
+      router.push('/dashboard');
+    }
+  }, [status, router]);
 
   if (status === 'loading') {
     return (
@@ -34,14 +36,12 @@ export default function Home() {
           <WalletIcon className="h-12 w-12 text-blue-600 mx-auto mb-4" />
           <h1 className="text-2xl font-bold mb-2">Financial Tracker</h1>
           <p className="mb-4">Please sign in to access your financial dashboard</p>
-          <Button variant="outline" onClick={() => window.location.href = '/login'}>
+          <Button variant="outline" onClick={() => router.push('/login')}>
             Sign In
           </Button>
         </div>
       </div>
     );
-  } else {
-    window.location.href = '/dashboard';
   }
 
   if (loading) {
@@ -60,10 +60,8 @@ export default function Home() {
       <div className="min-h-screen flex items-center justify-center">
         <div className="text-center">
           <p className="text-red-600 mb-4">Error: {error}</p>
-          {/* <Button onClick={refreshData}>Retry</Button> */}
         </div>
       </div>
     );
   }
-
 }

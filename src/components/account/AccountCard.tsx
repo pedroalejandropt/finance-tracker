@@ -49,9 +49,7 @@ export function AccountCard({ account, totalInUSD, onEdit, onDelete }: AccountCa
             {getAccountIcon(account.type)}
             <CardTitle className="text-lg">{account.name}</CardTitle>
           </div>
-          <Badge className={getAccountTypeColor(account.type)}>
-            {account.type}
-          </Badge>
+          <Badge className={getAccountTypeColor(account.type)}>{account.type}</Badge>
         </div>
       </CardHeader>
       <CardContent>
@@ -75,13 +73,13 @@ export function AccountCard({ account, totalInUSD, onEdit, onDelete }: AccountCa
             <span className="text-sm font-medium">{account.currency}</span>
           </div>
         </div>
-        
+
         {(onEdit || onDelete) && (
           <div className="flex space-x-2 pt-2 border-t">
             {onEdit && (
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => onEdit(account)}
                 className="flex-1"
               >
@@ -90,9 +88,9 @@ export function AccountCard({ account, totalInUSD, onEdit, onDelete }: AccountCa
               </Button>
             )}
             {onDelete && (
-              <Button 
-                variant="outline" 
-                size="sm" 
+              <Button
+                variant="outline"
+                size="sm"
                 onClick={() => onDelete(account.accountId)}
                 className="flex-1 text-red-600 hover:text-red-700 hover:bg-red-50"
               >

@@ -3,7 +3,7 @@
 import { useSession, signOut } from 'next-auth/react';
 import { Button } from '@/components/ui/button';
 import { ThemeToggle } from '@/components/DraggableCard';
-import { LogOutIcon, RefreshCwIcon, UserIcon, WalletIcon } from 'lucide-react';
+import { LogOutIcon, UserIcon, WalletIcon } from 'lucide-react';
 // import { useFinancialData } from '@/hooks/useFinancialData';
 
 export function Navbar() {
@@ -31,9 +31,7 @@ export function Navbar() {
             <div className="flex items-center space-x-3">
               <div className="hidden sm:flex items-center space-x-2">
                 <UserIcon className="h-4 w-4" />
-                <span className="text-sm font-medium truncate max-w-32">
-                  {session.user?.email}
-                </span>
+                <span className="text-sm font-medium truncate max-w-32">{session.user?.email}</span>
               </div>
               <Button
                 variant="outline"
@@ -48,7 +46,9 @@ export function Navbar() {
                 <RefreshCwIcon className="h-8 w-8  mx-auto" />
               </Button> */}
             </div>
-          ) : (<></>)}
+          ) : (
+            <></>
+          )}
           <ThemeToggle />
         </div>
       </div>

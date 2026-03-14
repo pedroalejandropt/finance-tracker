@@ -1,4 +1,10 @@
-import { S3Client, PutObjectCommand, GetObjectCommand, DeleteObjectCommand, ListObjectsV2Command } from '@aws-sdk/client-s3';
+import {
+  S3Client,
+  PutObjectCommand,
+  GetObjectCommand,
+  DeleteObjectCommand,
+  ListObjectsV2Command,
+} from '@aws-sdk/client-s3';
 import { getSignedUrl } from '@aws-sdk/s3-request-presigner';
 
 const s3Client = new S3Client({
@@ -67,7 +73,7 @@ export class S3Storage {
       });
 
       const response = await s3Client.send(command);
-      return response.Contents?.map(obj => obj.Key!).filter(Boolean) || [];
+      return response.Contents?.map((obj) => obj.Key!).filter(Boolean) || [];
     } catch (error) {
       console.error('Error listing S3 files:', error);
       return [];

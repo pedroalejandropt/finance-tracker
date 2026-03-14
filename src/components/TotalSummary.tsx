@@ -13,7 +13,12 @@ interface TotalSummaryProps {
   onCurrencyChange?: (currency: string) => void;
 }
 
-export function TotalSummary({ totals, previousTotal, baseCurrency = 'USD', onCurrencyChange }: TotalSummaryProps) {
+export function TotalSummary({
+  totals,
+  previousTotal,
+  baseCurrency = 'USD',
+  onCurrencyChange,
+}: TotalSummaryProps) {
   const componentProps: WidgetComponentProps = {
     totals,
     previousTotal,
@@ -21,11 +26,7 @@ export function TotalSummary({ totals, previousTotal, baseCurrency = 'USD', onCu
     onCurrencyChange,
   };
 
-  const {
-    widgets,
-    setWidgets,
-    availableWidgets,
-  } = useWidgets();
+  const { widgets, setWidgets, availableWidgets } = useWidgets();
   const [draggedCard, setDraggedCard] = useState<string | null>(null);
 
   const handleDragStart = (widget: string) => setDraggedCard(widget);
@@ -34,7 +35,7 @@ export function TotalSummary({ totals, previousTotal, baseCurrency = 'USD', onCu
 
   const handleDrop = (e: React.DragEvent, targetId: string) => {
     e.preventDefault();
-    
+
     if (!draggedCard || draggedCard === targetId) return;
 
     const draggedWidget = availableWidgets.find((widget) => widget.key === draggedCard);
@@ -55,25 +56,27 @@ export function TotalSummary({ totals, previousTotal, baseCurrency = 'USD', onCu
   return (
     <div className="space-y-6">
       <div className="flex flex-wrap gap-4">
-        {widgets && widgets.length > 0 && widgets?.map((widget) => {
-          const { key, label, width, component } = widget;
-          const Component = component;
-          return (
-            <DraggableCard
-              key={key}
-              id={key}
-              title={label}
-              width={width}
-              onDragStart={handleDragStart}
-              onDragEnd={handleDragEnd}
-              onDragOver={handleDragOver}
-              onDrop={handleDrop}
-              isDragging={draggedCard === key}
-            >
-              <Component {...componentProps} />
-            </DraggableCard>
-          );
-        })}
+        {widgets &&
+          widgets.length > 0 &&
+          widgets?.map((widget) => {
+            const { key, label, width, component } = widget;
+            const Component = component;
+            return (
+              <DraggableCard
+                key={key}
+                id={key}
+                title={label}
+                width={width}
+                onDragStart={handleDragStart}
+                onDragEnd={handleDragEnd}
+                onDragOver={handleDragOver}
+                onDrop={handleDrop}
+                isDragging={draggedCard === key}
+              >
+                <Component {...componentProps} />
+              </DraggableCard>
+            );
+          })}
       </div>
     </div>
   );

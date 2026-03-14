@@ -1,10 +1,10 @@
-import { GlobalTotals } from ".";
+import { GlobalTotals } from '.';
 
 export interface WidgetConfig {
-    key: string;
-    label: string;
-    width: string;
-    component: React.FC<WidgetComponentProps>;
+  key: string;
+  label: string;
+  width: string;
+  component: React.FC<WidgetComponentProps>;
 }
 
 export interface WidgetComponentProps {

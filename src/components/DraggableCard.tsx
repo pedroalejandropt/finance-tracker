@@ -27,7 +27,7 @@ export function DraggableCard({
   onDragEnd,
   onDragOver,
   onDrop,
-  isDragging = false
+  isDragging = false,
 }: DraggableCardProps) {
   const [isDragOver, setIsDragOver] = useState(false);
 
@@ -77,9 +77,7 @@ export function DraggableCard({
           <CardTitle className="text-sm font-medium">{title}</CardTitle>
         </div>
       </CardHeader>
-      <CardContent>
-        {children}
-      </CardContent>
+      <CardContent>{children}</CardContent>
     </Card>
   );
 }
@@ -92,17 +90,8 @@ export function ThemeToggle({ className = '' }: ThemeToggleProps) {
   const { theme, toggleTheme } = useTheme();
 
   return (
-    <Button
-      variant="outline"
-      size="sm"
-      onClick={toggleTheme}
-      className={`${className}`}
-    >
-      {theme === 'light' ? (
-        <MoonIcon className="h-4 w-4" />
-      ) : (
-        <SunIcon className="h-4 w-4" />
-      )}
+    <Button variant="outline" size="sm" onClick={toggleTheme} className={`${className}`}>
+      {theme === 'light' ? <MoonIcon className="h-4 w-4" /> : <SunIcon className="h-4 w-4" />}
     </Button>
   );
 }
