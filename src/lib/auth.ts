@@ -1,5 +1,8 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import bcrypt from 'bcryptjs';
+import { loginSchema } from './auth-schemas';
+import { findUserByEmail } from './auth-dynamo';
 
 export const authOptions: NextAuthOptions = {
   providers: [
@@ -9,21 +12,29 @@ export const authOptions: NextAuthOptions = {
         email: { label: 'Email', type: 'email' },
         password: { label: 'Password', type: 'password' },
       },
-      async authorize() {
-        // In production, this would verify against your database
-        // if (credentials?.email === 'demo@financialtracker.com' && credentials?.password === 'demo123') {
+      async authorize(credentials) {
+        const parsed = loginSchema.safeParse(credentials);
+        if (!parsed.success) return null;
+
+        const { email, password } = parsed.data;
+
+        const user = await findUserByEmail(email);
+        if (!user) return null;
+
+        const passwordMatch = await bcrypt.compare(password, user.passwordHash);
+        if (!passwordMatch) return null;
+
         return {
-          id: '1',
-          email: 'demo@financialtracker.com',
-          name: 'Demo User',
+          id: user.userId,
+          email: user.email,
+          name: user.name,
         };
-        // }
-        return null;
       },
     }),
   ],
   session: {
     strategy: 'jwt',
+    maxAge: 30 * 24 * 60 * 60, // 30 days
   },
   pages: {
     signIn: '/login',
