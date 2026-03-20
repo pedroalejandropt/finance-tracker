@@ -18,6 +18,14 @@ export const authOptions: NextAuthOptions = {
 
         const { email, password } = parsed.data;
 
+        // Demo fallback when DynamoDB is not configured
+        if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
+          if (email === 'demo@financialtracker.com' && password === 'demo123') {
+            return { id: 'demo', email, name: 'Demo User' };
+          }
+          return null;
+        }
+
         const user = await findUserByEmail(email);
         if (!user) return null;
 

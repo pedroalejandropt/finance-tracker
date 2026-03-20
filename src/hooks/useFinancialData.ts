@@ -2,7 +2,7 @@
 
 import { useState, useEffect } from 'react';
 import { Account, Stock, CurrencyRate, GlobalTotals } from '@/types';
-import { StockAPI, CurrencyAPI } from '@/lib/api';
+import { StockAPI } from '@/lib/api';
 import { FinancialCalculator } from '@/lib/calculations';
 
 export function useFinancialData() {
@@ -14,61 +14,69 @@ export function useFinancialData() {
   const [error, setError] = useState<string | null>(null);
   const [baseCurrency, setBaseCurrency] = useState<string>('USD');
 
-  // Initialize with sample data
+  // Initialize with demo data (clearly fictional values)
   const initializeSampleData = () => {
     const sampleAccounts: Account[] = [
       {
         accountId: '1',
-        name: 'Checking Account',
+        name: 'Demo Checking',
         currency: 'USD',
-        balance: 15000.0,
+        balance: 12_000,
         type: 'bank',
       },
       {
         accountId: '2',
-        name: 'Savings Account',
+        name: 'Demo Savings',
         currency: 'USD',
-        balance: 45000.0,
+        balance: 34_000,
         type: 'bank',
       },
       {
         accountId: '3',
-        name: 'EUR Investment Account',
+        name: 'Demo EUR Account',
         currency: 'EUR',
-        balance: 25000.0,
+        balance: 18_000,
         type: 'investment',
       },
       {
         accountId: '4',
-        name: 'Crypto Wallet',
+        name: 'Demo Crypto',
         currency: 'USD',
-        balance: 5000.0,
+        balance: 3_000,
         type: 'crypto',
       },
     ];
 
     const sampleStocks: Stock[] = [
       {
-        symbol: 'AAPL',
-        name: 'Apple Inc.',
-        shares: 50,
-        currentPrice: 175.5,
+        symbol: 'DEMO1',
+        name: 'Demo Corp A',
+        shares: 100,
+        currentPrice: 50,
         currency: 'USD',
         type: 'stock',
       },
       {
-        symbol: 'GOOGL',
-        name: 'Alphabet Inc.',
-        shares: 20,
-        currentPrice: 140.25,
+        symbol: 'DEMO2',
+        name: 'Demo Corp B',
+        shares: 200,
+        currentPrice: 25,
         currency: 'USD',
-        type: 'stock',
+        type: 'etf',
       },
       {
-        symbol: 'MSFT',
-        name: 'Microsoft Corporation',
-        shares: 30,
-        currentPrice: 380.75,
+        symbol: 'DEMO3',
+        name: 'Demo Euro Fund',
+        shares: 150,
+        currentPrice: 40,
+        currency: 'EUR',
+        type: 'etf',
+      },
+      {
+        symbol: 'DEMO4',
+        name: 'Demo Tech Inc',
+        shares: 80,
+        currentPrice: 75,
         currency: 'USD',
         type: 'stock',
       },
@@ -78,21 +86,14 @@ export function useFinancialData() {
     setStocks(sampleStocks);
   };
 
-  // Fetch currency rates
+  // Use hardcoded demo rates — no real API call
   const fetchCurrencyRates = async () => {
-    try {
-      const response = await CurrencyAPI.getExchangeRates('USD');
-      const rates: CurrencyRate[] = Object.entries(response.rates).map(([to, rate]) => ({
-        from: 'USD',
-        to: to,
-        rate,
-        timestamp: new Date(),
-      }));
-      setCurrencyRates(rates);
-    } catch (err) {
-      console.error('Error fetching currency rates:', err);
-      setError('Failed to fetch currency rates');
-    }
+    const demoRates: CurrencyRate[] = [
+      { from: 'USD', to: 'EUR', rate: 0.92, timestamp: new Date() },
+      { from: 'USD', to: 'GBP', rate: 0.79, timestamp: new Date() },
+      { from: 'USD', to: 'USD', rate: 1.0, timestamp: new Date() },
+    ];
+    setCurrencyRates(demoRates);
   };
 
   // Update stock prices
