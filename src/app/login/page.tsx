@@ -1,21 +1,24 @@
 'use client';
 
-import { useState } from 'react';
+import { useState, Suspense } from 'react';
 import { signIn } from 'next-auth/react';
-import { useRouter } from 'next/navigation';
+import { useRouter, useSearchParams } from 'next/navigation';
+import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
 import { WalletIcon, EyeIcon, EyeOffIcon } from 'lucide-react';
 
-export default function LoginPage() {
+function LoginForm() {
   const [email, setEmail] = useState('');
   const [password, setPassword] = useState('');
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
   const router = useRouter();
+  const searchParams = useSearchParams();
+  const registered = searchParams.get('registered');
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -30,7 +33,7 @@ export default function LoginPage() {
       });
 
       if (result?.error) {
-        setError('Invalid credentials');
+        setError('Invalid email or password');
       } else {
         router.push('/');
       }
@@ -55,6 +58,11 @@ export default function LoginPage() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {registered && (
+            <p className="mb-4 text-sm text-green-600 text-center">
+              Account created! You can now sign in.
+            </p>
+          )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -93,18 +101,27 @@ export default function LoginPage() {
                 </Button>
               </div>
             </div>
-            {error && <div className="text-sm text-red-600 text-center">{error}</div>}
+            {error && <p className="text-sm text-red-600 text-center">{error}</p>}
             <Button variant="outline" type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Signing in...' : 'Sign in'}
             </Button>
           </form>
-          <div className="mt-6 text-center text-sm text-gray-600">
-            <p>Demo credentials:</p>
-            <p>Email: demo@financialtracker.com</p>
-            <p>Password: demo123</p>
-          </div>
+          <p className="mt-4 text-center text-sm text-gray-600">
+            Don&apos;t have an account?{' '}
+            <Link href="/register" className="text-blue-600 hover:underline">
+              Create one
+            </Link>
+          </p>
         </CardContent>
       </Card>
     </div>
+  );
+}
+
+export default function LoginPage() {
+  return (
+    <Suspense>
+      <LoginForm />
+    </Suspense>
   );
 }
