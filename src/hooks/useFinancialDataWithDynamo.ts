@@ -1,7 +1,15 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Account, Stock, CurrencyRate, GlobalTotals, NetWorthSnapshot, Transaction } from '@/types';
+import {
+  Account,
+  Stock,
+  CurrencyRate,
+  GlobalTotals,
+  NetWorthSnapshot,
+  Transaction,
+  Budget,
+} from '@/types';
 import { CurrencyAPI } from '@/lib/api';
 import { FinancialCalculator } from '@/lib/calculations';
 
@@ -12,6 +20,7 @@ export function useFinancialDataWithDynamo() {
   const [currencyRates, setCurrencyRates] = useState<CurrencyRate[]>([]);
   const [totals, setTotals] = useState<GlobalTotals | null>(null);
   const [snapshots, setSnapshots] = useState<NetWorthSnapshot[]>([]);
+  const [budgets, setBudgets] = useState<Budget[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [baseCurrency, setBaseCurrency] = useState<string>('USD');
@@ -22,14 +31,16 @@ export function useFinancialDataWithDynamo() {
       try {
         setLoading(true);
 
-        // Load accounts, stocks, snapshots, and transactions in parallel
+        // Load accounts, stocks, snapshots, transactions, and budgets in parallel
         try {
-          const [accountsRes, stocksRes, snapshotsRes, transactionsRes] = await Promise.all([
-            fetch('/api/accounts'),
-            fetch('/api/stocks'),
-            fetch('/api/snapshots'),
-            fetch('/api/transactions'),
-          ]);
+          const [accountsRes, stocksRes, snapshotsRes, transactionsRes, budgetsRes] =
+            await Promise.all([
+              fetch('/api/accounts'),
+              fetch('/api/stocks'),
+              fetch('/api/snapshots'),
+              fetch('/api/transactions'),
+              fetch('/api/budgets'),
+            ]);
 
           if (accountsRes.ok) {
             const data = await accountsRes.json();
@@ -49,6 +60,11 @@ export function useFinancialDataWithDynamo() {
           if (transactionsRes.ok) {
             const data = await transactionsRes.json();
             setTransactions(Array.isArray(data) ? data : []);
+          }
+
+          if (budgetsRes.ok) {
+            const data = await budgetsRes.json();
+            setBudgets(Array.isArray(data) ? data : []);
           }
         } catch (err) {
           console.error('Error loading data from API:', err);
@@ -315,6 +331,60 @@ export function useFinancialDataWithDynamo() {
     }
   };
 
+  // CRUD Operations for Budgets
+  const addBudget = async (budget: Omit<Budget, 'budgetId' | 'createdAt'>) => {
+    try {
+      const res = await fetch('/api/budgets', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(budget),
+      });
+
+      if (res.ok) {
+        const newBudget: Budget = await res.json();
+        setBudgets((prev) => [...prev, newBudget]);
+      } else {
+        // Optimistic local add when DynamoDB not configured
+        const newBudget: Budget = {
+          ...budget,
+          budgetId: Date.now().toString(36) + Math.random().toString(36).substring(2),
+          createdAt: new Date().toISOString(),
+        };
+        setBudgets((prev) => [...prev, newBudget]);
+      }
+    } catch (err) {
+      console.error('Error adding budget:', err);
+    }
+  };
+
+  const updateBudget = async (budgetId: string, updates: Partial<Budget>) => {
+    try {
+      await fetch('/api/budgets', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ budgetId, ...updates }),
+      });
+
+      setBudgets((prev) => prev.map((b) => (b.budgetId === budgetId ? { ...b, ...updates } : b)));
+    } catch (err) {
+      console.error('Error updating budget:', err);
+    }
+  };
+
+  const deleteBudget = async (budgetId: string) => {
+    try {
+      await fetch('/api/budgets', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ budgetId }),
+      });
+
+      setBudgets((prev) => prev.filter((b) => b.budgetId !== budgetId));
+    } catch (err) {
+      console.error('Error deleting budget:', err);
+    }
+  };
+
   return {
     // Data
     accounts,
@@ -323,6 +393,7 @@ export function useFinancialDataWithDynamo() {
     transactions,
     currencyRates,
     totals,
+    budgets,
     loading,
     error,
     baseCurrency,
@@ -345,5 +416,10 @@ export function useFinancialDataWithDynamo() {
     addTransaction,
     updateTransaction,
     deleteTransaction,
+
+    // Budget CRUD
+    addBudget,
+    updateBudget,
+    deleteBudget,
   };
 }
