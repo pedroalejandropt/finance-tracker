@@ -130,16 +130,6 @@ function withErrorBoundary(Component: React.FC<TabComponentProps>): React.FC<Tab
   return WrappedComponent;
 }
 
-function withErrorBoundary(Component: React.FC<TabComponentProps>): React.FC<TabComponentProps> {
-  const WrappedComponent: React.FC<TabComponentProps> = (props) => (
-    <ErrorBoundary>
-      <Component {...props} />
-    </ErrorBoundary>
-  );
-  WrappedComponent.displayName = `WithErrorBoundary(${Component.displayName || Component.name})`;
-  return WrappedComponent;
-}
-
 // Configuración de tabs dinámica
 export const getTabConfigs = (): TabConfig[] => [
   {
