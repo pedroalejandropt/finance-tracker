@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { Account, Stock, GlobalTotals } from './index';
+import { Account, Stock, GlobalTotals, NetWorthSnapshot } from './index';
 
 export interface TabConfig {
   value: string;
@@ -12,6 +12,7 @@ export interface TabConfig {
 export interface TabComponentProps {
   accounts?: Account[];
   stocks?: Stock[];
+  snapshots?: NetWorthSnapshot[];
   totals?: GlobalTotals | null;
   baseCurrency?: string;
   onCurrencyChange?: (currency: string) => void;

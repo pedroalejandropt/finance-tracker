@@ -17,6 +17,7 @@ export default function DashboardPage() {
   const {
     accounts,
     stocks,
+    snapshots,
     totals,
     baseCurrency,
     setBaseCurrency,
@@ -78,6 +79,7 @@ export default function DashboardPage() {
   const tabProps: TabComponentProps = {
     accounts,
     stocks,
+    snapshots,
     totals,
     baseCurrency,
     onCurrencyChange: setBaseCurrency,

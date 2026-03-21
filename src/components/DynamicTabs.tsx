@@ -9,6 +9,9 @@ import { StockDistribution } from '@/components/StockDistribution';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
 import { usePagination } from '@/hooks/usePagination';
 import { Pagination } from '@/components/ui/Pagination';
+import { NetWorthChart } from '@/components/charts';
+import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
+import { TrendingUpIcon } from 'lucide-react';
 
 const PAGE_SIZE = 6;
 
@@ -16,6 +19,7 @@ const PAGE_SIZE = 6;
 const OverviewTab: React.FC<TabComponentProps> = ({
   totals,
   stocks = [],
+  snapshots = [],
   baseCurrency,
   onCurrencyChange,
 }) => (
@@ -26,6 +30,19 @@ const OverviewTab: React.FC<TabComponentProps> = ({
         baseCurrency={baseCurrency}
         onCurrencyChange={onCurrencyChange}
       />
+    )}
+    {snapshots.length >= 1 && (
+      <Card>
+        <CardHeader>
+          <CardTitle className="flex items-center space-x-2">
+            <TrendingUpIcon className="h-5 w-5" />
+            <span>Net Worth Over Time</span>
+          </CardTitle>
+        </CardHeader>
+        <CardContent>
+          <NetWorthChart snapshots={snapshots} baseCurrency={baseCurrency} height={240} />
+        </CardContent>
+      </Card>
     )}
     {stocks.length > 0 && <StockDistribution stocks={stocks} baseCurrency={baseCurrency} />}
   </div>

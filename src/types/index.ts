@@ -41,3 +41,11 @@ export interface GlobalTotals {
   totalUSD: number;
   totalsByCurrency: TotalsByCurrency[];
 }
+
+export interface NetWorthSnapshot {
+  snapshotId: string;
+  date: string; // YYYY-MM-DD
+  totalUSD: number;
+  baseCurrency: string;
+  createdAt?: string;
+}

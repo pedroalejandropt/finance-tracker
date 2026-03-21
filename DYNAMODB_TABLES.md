@@ -102,7 +102,28 @@ This document outlines the recommended DynamoDB table structure for the financia
 }
 ```
 
-### 4. Currency Rates Table (`finance-tracker-rates`)
+### 4. Net Worth Snapshots Table (`finance-tracker-snapshots`)
+
+**Primary Key:** `snapshotId` (String)
+
+**Global Secondary Index (GSI):** `userId-index` — PK: `userId`, SK: `date`
+
+One snapshot is written per user per day automatically when the dashboard loads.
+
+**Example Item:**
+
+```json
+{
+  "snapshotId": "uuid",
+  "userId": "user_123",
+  "date": "2024-03-15",
+  "totalUSD": 85400.0,
+  "baseCurrency": "USD",
+  "createdAt": "2024-03-15T08:00:00.000Z"
+}
+```
+
+### 5. Currency Rates Table (`finance-tracker-rates`)
 
 **Primary Key:** `fromCurrency` (String)
 **Sort Key:** `toCurrency#timestamp` (String)
