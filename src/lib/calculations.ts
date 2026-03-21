@@ -136,4 +136,43 @@ export class FinancialCalculator {
 
     return { change, changePercent };
   }
+
+  /**
+   * Computes unrealized P&L for all stocks that have a cost basis set.
+   * Returns totals in each stock's native currency (not converted).
+   */
+  static calculatePortfolioPnL(stocks: Stock[]): {
+    totalUnrealizedPnL: number; // summed in USD equivalent (using 1:1 for simplicity)
+    stocksWithPnL: {
+      symbol: string;
+      name: string;
+      currency: string;
+      totalValue: number;
+      totalCost: number;
+      unrealizedPnL: number;
+      unrealizedPnLPct: number;
+    }[];
+  } {
+    const stocksWithPnL = stocks
+      .filter((s) => s.costBasis !== undefined && s.costBasis > 0)
+      .map((s) => {
+        const totalValue = s.shares * s.currentPrice;
+        const totalCost = s.costBasis! * s.shares;
+        const unrealizedPnL = totalValue - totalCost;
+        const unrealizedPnLPct = totalCost > 0 ? (unrealizedPnL / totalCost) * 100 : 0;
+        return {
+          symbol: s.symbol,
+          name: s.name,
+          currency: s.currency,
+          totalValue,
+          totalCost,
+          unrealizedPnL,
+          unrealizedPnLPct,
+        };
+      });
+
+    const totalUnrealizedPnL = stocksWithPnL.reduce((sum, s) => sum + s.unrealizedPnL, 0);
+
+    return { totalUnrealizedPnL, stocksWithPnL };
+  }
 }
