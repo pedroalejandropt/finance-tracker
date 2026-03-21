@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Stock, Account } from '@/types';
+import { Stock, Account, Transaction } from '@/types';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { TrendingUpIcon } from 'lucide-react';
@@ -9,6 +9,7 @@ import { TabComponentProps } from '@/types/tab';
 import { StockForm } from '@/components/stock/StockForm';
 import { useVisibleTabs } from '@/components/DynamicTabs';
 import { AccountForm } from '@/components/account/AccountForm';
+import { TransactionForm } from '@/components/transaction/TransactionForm';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useFinancialDataWithDynamo } from '@/hooks/useFinancialDataWithDynamo';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
@@ -18,6 +19,7 @@ export default function DashboardPage() {
     accounts,
     stocks,
     snapshots,
+    transactions,
     totals,
     baseCurrency,
     setBaseCurrency,
@@ -27,6 +29,9 @@ export default function DashboardPage() {
     addStock,
     updateStock,
     deleteStock,
+    addTransaction,
+    updateTransaction,
+    deleteTransaction,
   } = useFinancialDataWithDynamo();
 
   const { status } = useSession();
@@ -43,6 +48,8 @@ export default function DashboardPage() {
   const [showStockForm, setShowStockForm] = useState(false);
   const [editingAccount, setEditingAccount] = useState<Account | null>(null);
   const [editingStock, setEditingStock] = useState<Stock | null>(null);
+  const [showTransactionForm, setShowTransactionForm] = useState(false);
+  const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
 
   const handleAddAccount = () => {
     setEditingAccount(null);
@@ -76,10 +83,27 @@ export default function DashboardPage() {
     }
   };
 
+  const handleAddTransaction = () => {
+    setEditingTransaction(null);
+    setShowTransactionForm(true);
+  };
+
+  const handleEditTransaction = (transaction: Transaction) => {
+    setEditingTransaction(transaction);
+    setShowTransactionForm(true);
+  };
+
+  const handleDeleteTransaction = async (transactionId: string) => {
+    if (confirm('Are you sure you want to delete this transaction?')) {
+      await deleteTransaction(transactionId);
+    }
+  };
+
   const tabProps: TabComponentProps = {
     accounts,
     stocks,
     snapshots,
+    transactions,
     totals,
     baseCurrency,
     onCurrencyChange: setBaseCurrency,
@@ -89,6 +113,9 @@ export default function DashboardPage() {
     onDeleteStock: handleDeleteStock,
     onAddAccount: handleAddAccount,
     onAddStock: handleAddStock,
+    onAddTransaction: handleAddTransaction,
+    onEditTransaction: handleEditTransaction,
+    onDeleteTransaction: handleDeleteTransaction,
   };
   const visibleTabs = useVisibleTabs(tabProps);
 
@@ -134,12 +161,13 @@ export default function DashboardPage() {
         </main>
 
         {/* Forms - Centered overlay */}
-        {(showAccountForm || showStockForm) && (
+        {(showAccountForm || showStockForm || showTransactionForm) && (
           <div
             className="fixed inset-0 flex items-center justify-center z-50 w-full h-full bg-black/50"
             onClick={() => {
               setShowAccountForm(false);
               setShowStockForm(false);
+              setShowTransactionForm(false);
             }}
           >
             <div className="shadow-lg max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
@@ -170,6 +198,22 @@ export default function DashboardPage() {
                     setShowStockForm(false);
                   }}
                   onCancel={() => setShowStockForm(false)}
+                />
+              )}
+
+              {showTransactionForm && (
+                <TransactionForm
+                  transaction={editingTransaction || undefined}
+                  accounts={accounts}
+                  onSubmit={async (transaction) => {
+                    if (editingTransaction) {
+                      await updateTransaction(editingTransaction.transactionId, transaction);
+                    } else {
+                      await addTransaction(transaction);
+                    }
+                    setShowTransactionForm(false);
+                  }}
+                  onCancel={() => setShowTransactionForm(false)}
                 />
               )}
             </div>

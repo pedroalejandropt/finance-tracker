@@ -123,7 +123,47 @@ One snapshot is written per user per day automatically when the dashboard loads.
 }
 ```
 
-### 5. Currency Rates Table (`finance-tracker-rates`)
+### 5. Transactions Table (`finance-tracker-transactions`)
+
+**Primary Key:** `transactionId` (String)
+
+**Global Secondary Index (GSI):**
+
+- **Index Name:** `userId-index`
+- **Partition Key:** `userId` (String)
+- **Sort Key:** `date` (String) — enables time-ordered queries per user
+
+**Attributes:**
+
+- `transactionId` (String) - Primary Key, UUID
+- `userId` (String) - Foreign key to Users table
+- `accountId` (String) - Foreign key to Accounts table
+- `type` (String) - `income` | `expense` | `transfer`
+- `category` (String) - e.g., `salary`, `food`, `transport`, …
+- `amount` (Number) - Absolute transaction amount
+- `currency` (String) - Transaction currency
+- `description` (String) - Free-text description
+- `date` (String) - ISO date `YYYY-MM-DD`
+- `createdAt` (String) - ISO timestamp
+
+**Example Item:**
+
+```json
+{
+  "transactionId": "550e8400-e29b-41d4-a716-446655440000",
+  "userId": "user_123",
+  "accountId": "acc_123",
+  "type": "expense",
+  "category": "food",
+  "amount": 42.5,
+  "currency": "USD",
+  "description": "Grocery store",
+  "date": "2024-03-15",
+  "createdAt": "2024-03-15T18:32:00.000Z"
+}
+```
+
+### 6. Currency Rates Table (`finance-tracker-rates`)
 
 **Primary Key:** `fromCurrency` (String)
 **Sort Key:** `toCurrency#timestamp` (String)
@@ -203,6 +243,26 @@ aws dynamodb create-table \
   --region us-east-1
 ```
 
+### Transactions Table
+
+```bash
+aws dynamodb create-table \
+  --table-name finance-tracker-transactions \
+  --attribute-definitions AttributeName=transactionId,AttributeType=S AttributeName=userId,AttributeType=S AttributeName=date,AttributeType=S \
+  --key-schema AttributeName=transactionId,KeyType=HASH \
+  --global-secondary-indexes \
+    '[
+      {
+        "IndexName": "userId-index",
+        "KeySchema": [{"AttributeName":"userId","KeyType":"HASH"},{"AttributeName":"date","KeyType":"RANGE"}],
+        "Projection":{"ProjectionType":"ALL"},
+        "BillingMode":"PAY_PER_REQUEST"
+      }
+    ]' \
+  --billing-mode PAY_PER_REQUEST \
+  --region us-east-1
+```
+
 ### Currency Rates Table
 
 ```bash
@@ -229,6 +289,7 @@ AWS_DYNAMODB_USERS_TABLE=finance-tracker-users
 AWS_DYNAMODB_ACCOUNTS_TABLE=finance-tracker-accounts
 AWS_DYNAMODB_STOCKS_TABLE=finance-tracker-stocks
 AWS_DYNAMODB_RATES_TABLE=finance-tracker-rates
+AWS_DYNAMODB_TRANSACTIONS_TABLE=finance-tracker-transactions
 ```
 
 ## Data Access Patterns
