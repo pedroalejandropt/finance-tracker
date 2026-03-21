@@ -2,8 +2,8 @@ import nodemailer from 'nodemailer';
 
 function getTransporter() {
   return nodemailer.createTransport({
-    host: process.env.SMTP_HOST || 'smtp.gmail.com',
-    port: parseInt(process.env.SMTP_PORT || '587'),
+    host: process.env.SMTP_HOST,
+    port: Number(process.env.SMTP_PORT ?? 587),
     secure: process.env.SMTP_SECURE === 'true',
     auth: {
       user: process.env.SMTP_USER,
@@ -12,11 +12,17 @@ function getTransporter() {
   });
 }
 
+function isSmtpConfigured(): boolean {
+  return !!(process.env.SMTP_HOST && process.env.SMTP_USER && process.env.SMTP_PASS);
+}
+
 export async function sendPasswordResetEmail(to: string, resetUrl: string): Promise<void> {
+  if (!isSmtpConfigured()) return;
+
   const transporter = getTransporter();
 
   await transporter.sendMail({
-    from: process.env.SMTP_FROM || process.env.SMTP_USER,
+    from: process.env.SMTP_FROM ?? process.env.SMTP_USER,
     to,
     subject: 'Reset your Financial Tracker password',
     html: `
@@ -32,5 +38,25 @@ export async function sendPasswordResetEmail(to: string, resetUrl: string): Prom
         </p>
       </div>
     `,
+  });
+}
+
+export async function sendVerificationEmail(to: string, verifyUrl: string): Promise<void> {
+  if (!isSmtpConfigured()) return;
+
+  const transporter = getTransporter();
+
+  await transporter.sendMail({
+    from: process.env.SMTP_FROM ?? process.env.SMTP_USER,
+    to,
+    subject: 'Verify your Financial Tracker email',
+    html: `
+      <p>Thanks for registering with Financial Tracker.</p>
+      <p>Please verify your email address by clicking the link below:</p>
+      <p><a href="${verifyUrl}">${verifyUrl}</a></p>
+      <p>This link expires in 24 hours.</p>
+      <p>If you did not create an account, you can safely ignore this email.</p>
+    `,
+    text: `Thanks for registering with Financial Tracker.\n\nPlease verify your email address by visiting:\n${verifyUrl}\n\nThis link expires in 24 hours.\n\nIf you did not create an account, you can safely ignore this email.`,
   });
 }

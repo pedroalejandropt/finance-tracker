@@ -1,14 +1,14 @@
 'use client';
 
 import { useState, Suspense } from 'react';
-import { signIn } from 'next-auth/react';
+import { signIn, useSession } from 'next-auth/react';
 import { useRouter, useSearchParams } from 'next/navigation';
 import Link from 'next/link';
 import { Button } from '@/components/ui/button';
 import { Card, CardContent, CardDescription, CardHeader, CardTitle } from '@/components/ui/card';
 import { Input } from '@/components/ui/input';
 import { Label } from '@/components/ui/label';
-import { WalletIcon, EyeIcon, EyeOffIcon } from 'lucide-react';
+import { WalletIcon, EyeIcon, EyeOffIcon, XIcon } from 'lucide-react';
 
 function LoginForm() {
   const [email, setEmail] = useState('');
@@ -16,10 +16,19 @@ function LoginForm() {
   const [showPassword, setShowPassword] = useState(false);
   const [isLoading, setIsLoading] = useState(false);
   const [error, setError] = useState('');
+  const [verifyBannerDismissed, setVerifyBannerDismissed] = useState(false);
+  const [resendLoading, setResendLoading] = useState(false);
+  const [resendSent, setResendSent] = useState(false);
   const router = useRouter();
   const searchParams = useSearchParams();
+  const { data: session } = useSession();
+
   const registered = searchParams.get('registered');
   const reset = searchParams.get('reset');
+  const verified = searchParams.get('verified');
+  const verifyError = searchParams.get('verify-error');
+
+  const showUnverifiedBanner = !verifyBannerDismissed && session?.user?.emailVerified === false;
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -45,6 +54,22 @@ function LoginForm() {
     }
   };
 
+  const handleResend = async () => {
+    setResendLoading(true);
+    try {
+      await fetch('/api/auth/resend-verification', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ email: session?.user?.email }),
+      });
+      setResendSent(true);
+    } catch {
+      // Silent — server always returns success
+    } finally {
+      setResendLoading(false);
+    }
+  };
+
   return (
     <div className="min-h-screen bg-gradient-to-br flex items-center justify-center p-4">
       <Card className="w-full max-w-md">
@@ -59,6 +84,16 @@ function LoginForm() {
           </CardDescription>
         </CardHeader>
         <CardContent>
+          {verified && (
+            <div className="mb-4 rounded-md bg-green-50 px-4 py-3 text-sm text-green-700 border border-green-200">
+              Email verified! You can now sign in.
+            </div>
+          )}
+          {verifyError && (
+            <div className="mb-4 rounded-md bg-red-50 px-4 py-3 text-sm text-red-700 border border-red-200">
+              Verification link is invalid or expired.
+            </div>
+          )}
           {registered && (
             <p className="mb-4 text-sm text-green-600 text-center">
               Account created! You can now sign in.
@@ -68,6 +103,31 @@ function LoginForm() {
             <p className="mb-4 text-sm text-green-600 text-center">
               Password reset! You can now sign in with your new password.
             </p>
+          )}
+          {showUnverifiedBanner && (
+            <div className="mb-4 flex items-start justify-between rounded-md bg-yellow-50 px-4 py-3 text-sm text-yellow-800 border border-yellow-200">
+              <span>
+                Please verify your email.{' '}
+                {resendSent ? (
+                  <span className="font-medium">Verification email sent!</span>
+                ) : (
+                  <button
+                    onClick={handleResend}
+                    disabled={resendLoading}
+                    className="font-medium underline hover:no-underline disabled:opacity-50"
+                  >
+                    {resendLoading ? 'Sending…' : 'Resend'}
+                  </button>
+                )}
+              </span>
+              <button
+                onClick={() => setVerifyBannerDismissed(true)}
+                className="ml-3 shrink-0 text-yellow-600 hover:text-yellow-900"
+                aria-label="Dismiss"
+              >
+                <XIcon className="h-4 w-4" />
+              </button>
+            </div>
           )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
