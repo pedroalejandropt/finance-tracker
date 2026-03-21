@@ -98,6 +98,7 @@ AWS_DYNAMODB_USERS_TABLE=finance-tracker-users
 AWS_DYNAMODB_ACCOUNTS_TABLE=finance-tracker-accounts
 AWS_DYNAMODB_STOCKS_TABLE=finance-tracker-stocks
 AWS_DYNAMODB_RATES_TABLE=finance-tracker-rates
+AWS_DYNAMODB_TRANSACTIONS_TABLE=finance-tracker-transactions
 
 # External APIs (optional — mock data used as fallback)
 ALPHA_VANTAGE_API_KEY=your-key

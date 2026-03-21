@@ -49,3 +49,29 @@ export interface NetWorthSnapshot {
   baseCurrency: string;
   createdAt?: string;
 }
+
+export type TransactionType = 'income' | 'expense' | 'transfer';
+export type TransactionCategory =
+  | 'salary'
+  | 'investment'
+  | 'food'
+  | 'transport'
+  | 'housing'
+  | 'health'
+  | 'entertainment'
+  | 'shopping'
+  | 'transfer'
+  | 'other';
+
+export interface Transaction {
+  transactionId: string;
+  accountId: string;
+  accountName?: string;
+  type: TransactionType;
+  category: TransactionCategory;
+  amount: number;
+  currency: string;
+  description: string;
+  date: string; // ISO date string YYYY-MM-DD
+  createdAt?: string;
+}

@@ -12,6 +12,7 @@ import { Pagination } from '@/components/ui/Pagination';
 import { NetWorthChart } from '@/components/charts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUpIcon } from 'lucide-react';
+import { TransactionList } from '@/components/transaction/TransactionList';
 
 const PAGE_SIZE = 6;
 
@@ -147,6 +148,35 @@ function withErrorBoundary(Component: React.FC<TabComponentProps>): React.FC<Tab
   return WrappedComponent;
 }
 
+const TransactionsTab: React.FC<TabComponentProps> = ({
+  transactions = [],
+  onAddTransaction,
+  onEditTransaction,
+  onDeleteTransaction,
+}) => (
+  <div className="space-y-6">
+    <div className="flex justify-between items-center">
+      <h2 className="text-xl font-semibold">Transaction History</h2>
+      {onAddTransaction && (
+        <Button
+          variant="outline"
+          onClick={onAddTransaction}
+          className="flex items-center space-x-2 px-4 py-2 text-white rounded-lg"
+        >
+          <PlusIcon className="h-4 w-4" />
+          <span>Add Transaction</span>
+        </Button>
+      )}
+    </div>
+
+    <TransactionList
+      transactions={transactions}
+      onEdit={onEditTransaction}
+      onDelete={onDeleteTransaction}
+    />
+  </div>
+);
+
 // Configuración de tabs dinámica
 export const getTabConfigs = (): TabConfig[] => [
   {
@@ -165,6 +195,11 @@ export const getTabConfigs = (): TabConfig[] => [
     label: 'Stocks',
     component: withErrorBoundary(StocksTab),
     // showCondition: (props) => Boolean(props.stocks && props.stocks.length > 0)
+  },
+  {
+    value: 'transactions',
+    label: 'Transactions',
+    component: TransactionsTab,
   },
   // {
   //   value: 'stock-distribution',

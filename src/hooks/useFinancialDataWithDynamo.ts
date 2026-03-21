@@ -1,13 +1,14 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Account, Stock, CurrencyRate, GlobalTotals, NetWorthSnapshot } from '@/types';
+import { Account, Stock, CurrencyRate, GlobalTotals, NetWorthSnapshot, Transaction } from '@/types';
 import { CurrencyAPI } from '@/lib/api';
 import { FinancialCalculator } from '@/lib/calculations';
 
 export function useFinancialDataWithDynamo() {
   const [accounts, setAccounts] = useState<Account[]>([]);
   const [stocks, setStocks] = useState<Stock[]>([]);
+  const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [currencyRates, setCurrencyRates] = useState<CurrencyRate[]>([]);
   const [totals, setTotals] = useState<GlobalTotals | null>(null);
   const [snapshots, setSnapshots] = useState<NetWorthSnapshot[]>([]);
@@ -21,12 +22,13 @@ export function useFinancialDataWithDynamo() {
       try {
         setLoading(true);
 
-        // Load accounts, stocks, and snapshots in parallel
+        // Load accounts, stocks, snapshots, and transactions in parallel
         try {
-          const [accountsRes, stocksRes, snapshotsRes] = await Promise.all([
+          const [accountsRes, stocksRes, snapshotsRes, transactionsRes] = await Promise.all([
             fetch('/api/accounts'),
             fetch('/api/stocks'),
             fetch('/api/snapshots'),
+            fetch('/api/transactions'),
           ]);
 
           if (accountsRes.ok) {
@@ -42,6 +44,11 @@ export function useFinancialDataWithDynamo() {
           if (snapshotsRes.ok) {
             const data = await snapshotsRes.json();
             setSnapshots(Array.isArray(data) ? data : []);
+          }
+
+          if (transactionsRes.ok) {
+            const data = await transactionsRes.json();
+            setTransactions(Array.isArray(data) ? data : []);
           }
         } catch (err) {
           console.error('Error loading data from API:', err);
@@ -223,6 +230,54 @@ export function useFinancialDataWithDynamo() {
     }
   };
 
+  // CRUD Operations for Transactions
+  const addTransaction = async (transaction: Omit<Transaction, 'transactionId' | 'createdAt'>) => {
+    try {
+      const res = await fetch('/api/transactions', {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(transaction),
+      });
+      if (res.ok) {
+        const created: Transaction = await res.json();
+        // Attach accountName for display
+        const account = accounts.find((a) => a.accountId === created.accountId);
+        setTransactions((prev) => [{ ...created, accountName: account?.name }, ...prev]);
+      }
+    } catch (err) {
+      console.error('Error adding transaction:', err);
+    }
+  };
+
+  const updateTransaction = async (transactionId: string, updates: Partial<Transaction>) => {
+    try {
+      const existing = transactions.find((t) => t.transactionId === transactionId);
+      if (!existing) return;
+      const updated = { ...existing, ...updates };
+      await fetch('/api/transactions', {
+        method: 'PUT',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(updated),
+      });
+      setTransactions((prev) => prev.map((t) => (t.transactionId === transactionId ? updated : t)));
+    } catch (err) {
+      console.error('Error updating transaction:', err);
+    }
+  };
+
+  const deleteTransaction = async (transactionId: string) => {
+    try {
+      await fetch('/api/transactions', {
+        method: 'DELETE',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify({ transactionId }),
+      });
+      setTransactions((prev) => prev.filter((t) => t.transactionId !== transactionId));
+    } catch (err) {
+      console.error('Error deleting transaction:', err);
+    }
+  };
+
   // Update stock prices with rate limiting
   const updateStockPrices = async () => {
     try {
@@ -265,6 +320,7 @@ export function useFinancialDataWithDynamo() {
     accounts,
     stocks,
     snapshots,
+    transactions,
     currencyRates,
     totals,
     loading,
@@ -284,5 +340,10 @@ export function useFinancialDataWithDynamo() {
     addStock,
     updateStock,
     deleteStock,
+
+    // Transaction CRUD
+    addTransaction,
+    updateTransaction,
+    deleteTransaction,
   };
 }
