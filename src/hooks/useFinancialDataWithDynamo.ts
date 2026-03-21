@@ -1,6 +1,6 @@
 'use client';
 
-import { useState, useEffect } from 'react';
+import { useState, useEffect, useRef } from 'react';
 import {
   Account,
   Stock,
@@ -13,9 +13,14 @@ import {
 import { CurrencyAPI } from '@/lib/api';
 import { FinancialCalculator } from '@/lib/calculations';
 
-export function useFinancialDataWithDynamo() {
-  const [accounts, setAccounts] = useState<Account[]>([]);
-  const [stocks, setStocks] = useState<Stock[]>([]);
+interface InitialData {
+  accounts?: Account[];
+  stocks?: Stock[];
+}
+
+export function useFinancialDataWithDynamo(initialData?: InitialData) {
+  const [accounts, setAccounts] = useState<Account[]>(initialData?.accounts ?? []);
+  const [stocks, setStocks] = useState<Stock[]>(initialData?.stocks ?? []);
   const [transactions, setTransactions] = useState<Transaction[]>([]);
   const [currencyRates, setCurrencyRates] = useState<CurrencyRate[]>([]);
   const [totals, setTotals] = useState<GlobalTotals | null>(null);
@@ -25,32 +30,54 @@ export function useFinancialDataWithDynamo() {
   const [error, setError] = useState<string | null>(null);
   const [baseCurrency, setBaseCurrency] = useState<string>('USD');
 
+  // Track whether this is the first load so we can skip fetching accounts/stocks
+  // when they were already provided as server-side initial data.
+  const isFirstLoad = useRef(true);
+  const hasInitialData = useRef(
+    (initialData?.accounts !== undefined && initialData.accounts.length > 0) ||
+      (initialData?.stocks !== undefined && initialData.stocks.length > 0)
+  );
+
   // Load initial data from API routes (which access DynamoDB server-side)
   useEffect(() => {
     const loadData = async () => {
       try {
         setLoading(true);
 
-        // Load accounts, stocks, snapshots, transactions, and budgets in parallel
-        try {
-          const [accountsRes, stocksRes, snapshotsRes, transactionsRes, budgetsRes] =
-            await Promise.all([
+        // Skip fetching accounts and stocks on first load if initial data was provided
+        // by the server. This avoids a redundant double-fetch.
+        const skipAccountsStocks = isFirstLoad.current && hasInitialData.current;
+        isFirstLoad.current = false;
+
+        if (!skipAccountsStocks) {
+          // Load accounts and stocks in parallel
+          try {
+            const [accountsRes, stocksRes] = await Promise.all([
               fetch('/api/accounts'),
               fetch('/api/stocks'),
-              fetch('/api/snapshots'),
-              fetch('/api/transactions'),
-              fetch('/api/budgets'),
             ]);
 
-          if (accountsRes.ok) {
-            const data = await accountsRes.json();
-            setAccounts(Array.isArray(data) ? data : []);
-          }
+            if (accountsRes.ok) {
+              const data = await accountsRes.json();
+              setAccounts(Array.isArray(data) ? data : []);
+            }
 
-          if (stocksRes.ok) {
-            const data = await stocksRes.json();
-            setStocks(Array.isArray(data) ? data : []);
+            if (stocksRes.ok) {
+              const data = await stocksRes.json();
+              setStocks(Array.isArray(data) ? data : []);
+            }
+          } catch (err) {
+            console.error('Error loading data from API:', err);
           }
+        }
+
+        // Load snapshots, transactions, and budgets in parallel (always needed)
+        try {
+          const [snapshotsRes, transactionsRes, budgetsRes] = await Promise.all([
+            fetch('/api/snapshots'),
+            fetch('/api/transactions'),
+            fetch('/api/budgets'),
+          ]);
 
           if (snapshotsRes.ok) {
             const data = await snapshotsRes.json();
