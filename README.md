@@ -47,6 +47,7 @@ A personal finance dashboard built with Next.js, AWS DynamoDB, and real-time mar
 - **Stock portfolio management** — add, edit, and delete stock positions with live price refresh (Alpha Vantage)
 - **Dark / light mode** — persisted per user in `localStorage`
 - **Authentication** — credential-based login with bcrypt password hashing and JWT sessions
+- **OAuth sign-in** — Google and GitHub
 - **User registration** — sign up with email and password (stored in DynamoDB)
 - **Persistent storage** — all data stored in AWS DynamoDB via server-side API routes
 - **Demo mode** — works fully without DynamoDB configured (in-memory demo data)
@@ -103,6 +104,12 @@ AWS_DYNAMODB_TRANSACTIONS_TABLE=finance-tracker-transactions
 # External APIs (optional — mock data used as fallback)
 ALPHA_VANTAGE_API_KEY=your-key
 EXCHANGE_RATE_API_KEY=your-key
+
+# OAuth (optional)
+GOOGLE_CLIENT_ID=your-google-client-id
+GOOGLE_CLIENT_SECRET=your-google-client-secret
+GITHUB_CLIENT_ID=your-github-client-id
+GITHUB_CLIENT_SECRET=your-github-client-secret
 ```
 
 ### Run locally
