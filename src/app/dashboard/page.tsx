@@ -11,6 +11,7 @@ import { useVisibleTabs } from '@/components/DynamicTabs';
 import { AccountForm } from '@/components/account/AccountForm';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useFinancialDataWithDynamo } from '@/hooks/useFinancialDataWithDynamo';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 export default function DashboardPage() {
   const {
@@ -93,39 +94,41 @@ export default function DashboardPage() {
     status === 'authenticated' && (
       <div className="min-h-screen relative">
         <main className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8`}>
-          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
-            <TabsList
-              className={`grid w-full ${
-                visibleTabs.length === 2
-                  ? 'grid-cols-2'
-                  : visibleTabs.length === 3
-                    ? 'grid-cols-3'
-                    : visibleTabs.length === 4
-                      ? 'grid-cols-4'
-                      : 'grid-cols-5'
-              }`}
-            >
-              {visibleTabs.map((tab) => (
-                <TabsTrigger
-                  key={tab.value}
-                  value={tab.value}
-                  className="flex items-center space-x-2"
-                >
-                  <TrendingUpIcon className="h-4 w-4" />
-                  <span>{tab.label}</span>
-                </TabsTrigger>
-              ))}
-            </TabsList>
+          <ErrorBoundary>
+            <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">
+              <TabsList
+                className={`grid w-full ${
+                  visibleTabs.length === 2
+                    ? 'grid-cols-2'
+                    : visibleTabs.length === 3
+                      ? 'grid-cols-3'
+                      : visibleTabs.length === 4
+                        ? 'grid-cols-4'
+                        : 'grid-cols-5'
+                }`}
+              >
+                {visibleTabs.map((tab) => (
+                  <TabsTrigger
+                    key={tab.value}
+                    value={tab.value}
+                    className="flex items-center space-x-2"
+                  >
+                    <TrendingUpIcon className="h-4 w-4" />
+                    <span>{tab.label}</span>
+                  </TabsTrigger>
+                ))}
+              </TabsList>
 
-            {visibleTabs.map((tab) => {
-              const Component = tab.component;
-              return (
-                <TabsContent key={tab.value} value={tab.value}>
-                  <Component {...tabProps} />
-                </TabsContent>
-              );
-            })}
-          </Tabs>
+              {visibleTabs.map((tab) => {
+                const Component = tab.component;
+                return (
+                  <TabsContent key={tab.value} value={tab.value}>
+                    <Component {...tabProps} />
+                  </TabsContent>
+                );
+              })}
+            </Tabs>
+          </ErrorBoundary>
         </main>
 
         {/* Forms - Centered overlay */}

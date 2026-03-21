@@ -8,6 +8,7 @@ import { Stock } from '@/types';
 import { FinancialCalculator } from '@/lib/calculations';
 import { TrendingUpIcon, BarChart3Icon } from 'lucide-react';
 import { useFinancialDataWithDynamo } from '@/hooks/useFinancialDataWithDynamo';
+import { AsyncErrorBoundary } from '@/components/AsyncErrorBoundary';
 
 interface StockDistributionProps {
   stocks: Stock[];
@@ -136,98 +137,100 @@ export function StockDistribution({ stocks, baseCurrency = 'USD' }: StockDistrib
         </CardTitle>
       </CardHeader>
       <CardContent>
-        <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
-          <TabsList className="grid w-full grid-cols-4">
-            <TabsTrigger value="pie" className="flex items-center space-x-2">
-              <TrendingUpIcon className="h-4 w-4" />
-              <span>By Currency</span>
-            </TabsTrigger>
-            <TabsTrigger value="treemap" className="flex items-center space-x-2">
-              <BarChart3Icon className="h-4 w-4" />
-              <span>Treemap</span>
-            </TabsTrigger>
-            <TabsTrigger value="type" className="flex items-center space-x-2">
-              <TrendingUpIcon className="h-4 w-4" />
-              <span>Stocks vs ETFs</span>
-            </TabsTrigger>
-            <TabsTrigger value="stocks" className="flex items-center space-x-2">
-              <TrendingUpIcon className="h-4 w-4" />
-              <span>Stocks</span>
-            </TabsTrigger>
-          </TabsList>
+        <AsyncErrorBoundary message="Chart failed to load">
+          <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-4">
+            <TabsList className="grid w-full grid-cols-4">
+              <TabsTrigger value="pie" className="flex items-center space-x-2">
+                <TrendingUpIcon className="h-4 w-4" />
+                <span>By Currency</span>
+              </TabsTrigger>
+              <TabsTrigger value="treemap" className="flex items-center space-x-2">
+                <BarChart3Icon className="h-4 w-4" />
+                <span>Treemap</span>
+              </TabsTrigger>
+              <TabsTrigger value="type" className="flex items-center space-x-2">
+                <TrendingUpIcon className="h-4 w-4" />
+                <span>Stocks vs ETFs</span>
+              </TabsTrigger>
+              <TabsTrigger value="stocks" className="flex items-center space-x-2">
+                <TrendingUpIcon className="h-4 w-4" />
+                <span>Stocks</span>
+              </TabsTrigger>
+            </TabsList>
 
-          <TabsContent value="pie" className="space-y-4">
-            <div className="text-sm text-gray-600 mb-4">
-              Distribution of stock portfolio by currency
-            </div>
-            <CustomPieChart
-              data={currencyData}
-              colors={COLORS}
-              height={300}
-              showLegend={true}
-              formatCurrency={(value, currency) =>
-                FinancialCalculator.formatCurrency(value, currency || baseCurrency)
-              }
-            />
-          </TabsContent>
+            <TabsContent value="pie" className="space-y-4">
+              <div className="text-sm text-gray-600 mb-4">
+                Distribution of stock portfolio by currency
+              </div>
+              <CustomPieChart
+                data={currencyData}
+                colors={COLORS}
+                height={300}
+                showLegend={true}
+                formatCurrency={(value, currency) =>
+                  FinancialCalculator.formatCurrency(value, currency || baseCurrency)
+                }
+              />
+            </TabsContent>
 
-          <TabsContent value="treemap" className="space-y-4">
-            <div className="text-sm text-gray-600 mb-4">
-              Individual stock values (size represents total value)
-            </div>
-            <CustomTreemap
-              data={stockTreemapData}
-              colors={COLORS}
-              height={400}
-              baseCurrency={baseCurrency}
-              formatCurrency={(value, currency) =>
-                FinancialCalculator.formatCurrency(value, currency || baseCurrency)
-              }
-            />
-          </TabsContent>
+            <TabsContent value="treemap" className="space-y-4">
+              <div className="text-sm text-gray-600 mb-4">
+                Individual stock values (size represents total value)
+              </div>
+              <CustomTreemap
+                data={stockTreemapData}
+                colors={COLORS}
+                height={400}
+                baseCurrency={baseCurrency}
+                formatCurrency={(value, currency) =>
+                  FinancialCalculator.formatCurrency(value, currency || baseCurrency)
+                }
+              />
+            </TabsContent>
 
-          <TabsContent value="type" className="space-y-4">
-            <div className="text-sm text-gray-600 mb-4">
-              Distribution between individual stocks and ETFs
-            </div>
-            <CustomPieChart
-              data={stockTypeData}
-              colors={['#0088FE', '#00C49F']}
-              height={300}
-              showLegend={true}
-              baseCurrency={baseCurrency}
-              formatCurrency={(value, currency) =>
-                FinancialCalculator.formatCurrency(value, currency || baseCurrency)
-              }
-            />
-          </TabsContent>
+            <TabsContent value="type" className="space-y-4">
+              <div className="text-sm text-gray-600 mb-4">
+                Distribution between individual stocks and ETFs
+              </div>
+              <CustomPieChart
+                data={stockTypeData}
+                colors={['#0088FE', '#00C49F']}
+                height={300}
+                showLegend={true}
+                baseCurrency={baseCurrency}
+                formatCurrency={(value, currency) =>
+                  FinancialCalculator.formatCurrency(value, currency || baseCurrency)
+                }
+              />
+            </TabsContent>
 
-          <TabsContent value="stocks" className="space-y-4">
-            <div className="text-sm text-gray-600 mb-4">
-              Distribution between individual stocks and ETFs
-            </div>
-            <CustomPieChart
-              data={stocksData}
-              colors={[
-                '#0088FE',
-                '#00C49F',
-                '#FFBB28',
-                '#FF8042',
-                '#8884D8',
-                '#82CA9D',
-                '#9f82caff',
-                '#ca8282ff',
-                '#c5ca82ff',
-              ]}
-              height={300}
-              showLegend={true}
-              baseCurrency={baseCurrency}
-              formatCurrency={(value, currency) =>
-                FinancialCalculator.formatCurrency(value, currency || baseCurrency)
-              }
-            />
-          </TabsContent>
-        </Tabs>
+            <TabsContent value="stocks" className="space-y-4">
+              <div className="text-sm text-gray-600 mb-4">
+                Distribution between individual stocks and ETFs
+              </div>
+              <CustomPieChart
+                data={stocksData}
+                colors={[
+                  '#0088FE',
+                  '#00C49F',
+                  '#FFBB28',
+                  '#FF8042',
+                  '#8884D8',
+                  '#82CA9D',
+                  '#9f82caff',
+                  '#ca8282ff',
+                  '#c5ca82ff',
+                ]}
+                height={300}
+                showLegend={true}
+                baseCurrency={baseCurrency}
+                formatCurrency={(value, currency) =>
+                  FinancialCalculator.formatCurrency(value, currency || baseCurrency)
+                }
+              />
+            </TabsContent>
+          </Tabs>
+        </AsyncErrorBoundary>
       </CardContent>
     </Card>
   );
