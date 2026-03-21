@@ -27,6 +27,7 @@ export function StockForm({ stock, onSubmit, onCancel }: StockFormProps) {
     symbol: stock?.symbol || '',
     shares: stock?.shares || 0,
     currentPrice: stock?.currentPrice || 0,
+    costBasis: stock?.costBasis ?? 0,
     currency: stock?.currency || 'USD',
     type: stock?.type || 'stock',
   });
@@ -119,6 +120,21 @@ export function StockForm({ stock, onSubmit, onCancel }: StockFormProps) {
               }
               placeholder="0.00"
               required
+            />
+          </div>
+
+          <div className="space-y-2">
+            <Label htmlFor="costBasis">Avg. Purchase Price per Share (optional)</Label>
+            <Input
+              id="costBasis"
+              type="number"
+              step="0.01"
+              min="0"
+              value={formData.costBasis}
+              onChange={(e) =>
+                setFormData({ ...formData, costBasis: parseFloat(e.target.value) || 0 })
+              }
+              placeholder="0.00 — leave blank if unknown"
             />
           </div>
 

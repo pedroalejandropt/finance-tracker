@@ -11,6 +11,7 @@ export interface Stock {
   name: string;
   shares: number;
   currentPrice: number;
+  costBasis?: number; // average purchase price per share (optional, for P&L)
   currency: string;
   type: string;
 }

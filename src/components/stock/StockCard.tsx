@@ -19,6 +19,13 @@ export function StockCard({ stock, previousPrice, onEdit, onDelete }: StockCardP
   const change = previousPrice ? stock.currentPrice - previousPrice : 0;
   const changePercent = previousPrice ? (change / previousPrice) * 100 : 0;
 
+  // P&L from cost basis
+  const hasCostBasis = stock.costBasis !== undefined && stock.costBasis > 0;
+  const totalCost = hasCostBasis ? stock.costBasis! * stock.shares : 0;
+  const unrealizedPnL = hasCostBasis ? totalValue - totalCost : 0;
+  const unrealizedPnLPct = hasCostBasis && totalCost > 0 ? (unrealizedPnL / totalCost) * 100 : 0;
+  const pnlColor = unrealizedPnL >= 0 ? 'text-green-600' : 'text-red-600';
+
   const getChangeIcon = () => {
     if (change > 0) return <TrendingUpIcon className="h-4 w-4 text-green-500" />;
     if (change < 0) return <TrendingDownIcon className="h-4 w-4 text-red-500" />;
@@ -80,11 +87,33 @@ export function StockCard({ stock, previousPrice, onEdit, onDelete }: StockCardP
               <div className="flex items-center space-x-1">
                 {getChangeIcon()}
                 <span className={`text-sm font-medium ${getChangeColor()}`}>
-                  {FinancialCalculator.formatCurrency(change, stock.currency)}(
+                  {FinancialCalculator.formatCurrency(change, stock.currency)} (
                   {changePercent.toFixed(2)}%)
                 </span>
               </div>
             </div>
+          )}
+          {hasCostBasis && (
+            <>
+              <div className="flex justify-between items-baseline">
+                <span className="text-sm text-gray-600">Cost Basis:</span>
+                <span className="text-sm">
+                  {FinancialCalculator.formatCurrency(totalCost, stock.currency)}
+                </span>
+              </div>
+              <div className="flex justify-between items-center">
+                <span className="text-sm text-gray-600">Unrealized P&amp;L:</span>
+                <div className={`flex items-center gap-1 text-sm font-semibold ${pnlColor}`}>
+                  {unrealizedPnL >= 0 ? (
+                    <TrendingUpIcon className="h-3.5 w-3.5" />
+                  ) : (
+                    <TrendingDownIcon className="h-3.5 w-3.5" />
+                  )}
+                  {FinancialCalculator.formatCurrency(unrealizedPnL, stock.currency)} (
+                  {unrealizedPnLPct.toFixed(2)}%)
+                </div>
+              </div>
+            </>
           )}
         </div>
         {(onEdit || onDelete) && (
