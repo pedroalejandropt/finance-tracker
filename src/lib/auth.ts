@@ -18,11 +18,13 @@ export const authOptions: NextAuthOptions = {
 
         const { email, password } = parsed.data;
 
-        // Demo fallback when DynamoDB is not configured
+        // Demo account — always available for E2E tests and local development
+        if (email === 'demo@financialtracker.com' && password === 'demo123') {
+          return { id: 'demo', email, name: 'Demo User' };
+        }
+
+        // Real users — require DynamoDB
         if (!process.env.AWS_ACCESS_KEY_ID || !process.env.AWS_SECRET_ACCESS_KEY) {
-          if (email === 'demo@financialtracker.com' && password === 'demo123') {
-            return { id: 'demo', email, name: 'Demo User' };
-          }
           return null;
         }
 
