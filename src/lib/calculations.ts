@@ -118,12 +118,13 @@ export class FinancialCalculator {
     return 1;
   }
 
-  static formatCurrency(amount: number, currency: string): string {
+  static formatCurrency(amount: number, currency: string, compact = false): string {
     return new Intl.NumberFormat('en-US', {
       style: 'currency',
       currency: currency,
-      minimumFractionDigits: 2,
-      maximumFractionDigits: 2,
+      minimumFractionDigits: compact ? 0 : 2,
+      maximumFractionDigits: compact ? 0 : 2,
+      notation: compact ? 'compact' : 'standard',
     }).format(amount);
   }
 

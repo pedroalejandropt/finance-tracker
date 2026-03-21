@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Account, Stock, CurrencyRate, GlobalTotals } from '@/types';
+import { Account, Stock, CurrencyRate, GlobalTotals, NetWorthSnapshot } from '@/types';
 import { CurrencyAPI } from '@/lib/api';
 import { FinancialCalculator } from '@/lib/calculations';
 
@@ -10,6 +10,7 @@ export function useFinancialDataWithDynamo() {
   const [stocks, setStocks] = useState<Stock[]>([]);
   const [currencyRates, setCurrencyRates] = useState<CurrencyRate[]>([]);
   const [totals, setTotals] = useState<GlobalTotals | null>(null);
+  const [snapshots, setSnapshots] = useState<NetWorthSnapshot[]>([]);
   const [loading, setLoading] = useState(true);
   const [error, setError] = useState<string | null>(null);
   const [baseCurrency, setBaseCurrency] = useState<string>('USD');
@@ -20,11 +21,12 @@ export function useFinancialDataWithDynamo() {
       try {
         setLoading(true);
 
-        // Load accounts and stocks in parallel
+        // Load accounts, stocks, and snapshots in parallel
         try {
-          const [accountsRes, stocksRes] = await Promise.all([
+          const [accountsRes, stocksRes, snapshotsRes] = await Promise.all([
             fetch('/api/accounts'),
             fetch('/api/stocks'),
+            fetch('/api/snapshots'),
           ]);
 
           if (accountsRes.ok) {
@@ -35,6 +37,11 @@ export function useFinancialDataWithDynamo() {
           if (stocksRes.ok) {
             const data = await stocksRes.json();
             setStocks(Array.isArray(data) ? data : []);
+          }
+
+          if (snapshotsRes.ok) {
+            const data = await snapshotsRes.json();
+            setSnapshots(Array.isArray(data) ? data : []);
           }
         } catch (err) {
           console.error('Error loading data from API:', err);
@@ -86,7 +93,7 @@ export function useFinancialDataWithDynamo() {
     loadData();
   }, [baseCurrency]);
 
-  // Calculate totals
+  // Calculate totals and persist a daily net-worth snapshot
   useEffect(() => {
     if (accounts.length > 0 || stocks.length > 0 || currencyRates.length > 0) {
       const calculatedTotals = FinancialCalculator.calculateGlobalTotals(
@@ -96,8 +103,24 @@ export function useFinancialDataWithDynamo() {
         baseCurrency
       );
       setTotals(calculatedTotals);
+
+      // Save a snapshot for today if we don't already have one
+      const today = new Date().toISOString().split('T')[0];
+      const alreadyHaveToday = snapshots.some((s) => s.date === today);
+      if (!alreadyHaveToday && calculatedTotals.totalUSD > 0) {
+        fetch('/api/snapshots', {
+          method: 'POST',
+          headers: { 'Content-Type': 'application/json' },
+          body: JSON.stringify({ totalUSD: calculatedTotals.totalUSD, baseCurrency }),
+        })
+          .then((res) => res.json())
+          .then((saved: NetWorthSnapshot) => {
+            setSnapshots((prev) => [...prev, saved]);
+          })
+          .catch(() => {});
+      }
     }
-  }, [accounts, stocks, currencyRates, baseCurrency]);
+  }, [accounts, stocks, currencyRates, baseCurrency]); // eslint-disable-line react-hooks/exhaustive-deps
 
   // CRUD Operations for Accounts
   const addAccount = async (account: Omit<Account, 'accountId'>) => {
@@ -241,6 +264,7 @@ export function useFinancialDataWithDynamo() {
     // Data
     accounts,
     stocks,
+    snapshots,
     currencyRates,
     totals,
     loading,
