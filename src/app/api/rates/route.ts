@@ -4,6 +4,7 @@ import { authOptions } from '@/lib/auth';
 import { CurrencyRate } from '@/types';
 import { DynamoDBClient, QueryCommand, PutItemCommand } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
+import { withRateLimit } from '@/lib/with-rate-limit';
 
 const RATES_TABLE = process.env.AWS_DYNAMODB_RATES_TABLE || 'finance-tracker-rates';
 
@@ -21,7 +22,7 @@ function isDynamoConfigured() {
   return !!process.env.AWS_ACCESS_KEY_ID && !!process.env.AWS_SECRET_ACCESS_KEY;
 }
 
-export async function GET(request: NextRequest) {
+export const GET = withRateLimit(async (request: NextRequest) => {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -54,9 +55,9 @@ export async function GET(request: NextRequest) {
     console.error('Error getting currency rates:', error);
     return NextResponse.json([]);
   }
-}
+});
 
-export async function POST(request: NextRequest) {
+export const POST = withRateLimit(async (request: NextRequest) => {
   console.log('POST request received');
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
@@ -89,4 +90,4 @@ export async function POST(request: NextRequest) {
     console.error('Error saving currency rate:', error);
     return NextResponse.json({ error: 'Failed to save currency rate' }, { status: 500 });
   }
-}
+});
