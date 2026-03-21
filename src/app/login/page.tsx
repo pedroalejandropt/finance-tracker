@@ -19,6 +19,7 @@ function LoginForm() {
   const router = useRouter();
   const searchParams = useSearchParams();
   const registered = searchParams.get('registered');
+  const reset = searchParams.get('reset');
 
   const handleSubmit = async (e: React.FormEvent<HTMLFormElement>) => {
     e.preventDefault();
@@ -63,6 +64,11 @@ function LoginForm() {
               Account created! You can now sign in.
             </p>
           )}
+          {reset && (
+            <p className="mb-4 text-sm text-green-600 text-center">
+              Password reset! You can now sign in with your new password.
+            </p>
+          )}
           <form onSubmit={handleSubmit} className="space-y-4">
             <div className="space-y-2">
               <Label htmlFor="email">Email</Label>
@@ -102,6 +108,11 @@ function LoginForm() {
               </div>
             </div>
             {error && <p className="text-sm text-red-600 text-center">{error}</p>}
+            <div className="text-right">
+              <Link href="/forgot-password" className="text-sm text-blue-600 hover:underline">
+                Forgot password?
+              </Link>
+            </div>
             <Button variant="outline" type="submit" className="w-full" disabled={isLoading}>
               {isLoading ? 'Signing in...' : 'Sign in'}
             </Button>
