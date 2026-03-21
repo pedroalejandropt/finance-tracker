@@ -9,6 +9,7 @@ import {
   DeleteItemCommand,
 } from '@aws-sdk/client-dynamodb';
 import { marshall, unmarshall } from '@aws-sdk/util-dynamodb';
+import { withRateLimit } from '@/lib/with-rate-limit';
 
 const ACCOUNTS_TABLE = process.env.AWS_DYNAMODB_ACCOUNTS_TABLE || 'finance-tracker-accounts';
 
@@ -26,7 +27,7 @@ function isDynamoConfigured() {
   return !!process.env.AWS_ACCESS_KEY_ID && !!process.env.AWS_SECRET_ACCESS_KEY;
 }
 
-export async function GET(request: NextRequest) {
+export const GET = withRateLimit(async (request: NextRequest) => {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -57,9 +58,9 @@ export async function GET(request: NextRequest) {
     console.error('Error getting accounts:', error);
     return NextResponse.json([]);
   }
-}
+});
 
-export async function POST(request: NextRequest) {
+export const POST = withRateLimit(async (request: NextRequest) => {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -89,9 +90,9 @@ export async function POST(request: NextRequest) {
     console.error('Error saving account:', error);
     return NextResponse.json({ error: 'Failed to save account' }, { status: 500 });
   }
-}
+});
 
-export async function DELETE(request: NextRequest) {
+export const DELETE = withRateLimit(async (request: NextRequest) => {
   const session = await getServerSession(authOptions);
   if (!session?.user?.email) {
     return NextResponse.json({ error: 'Unauthorized' }, { status: 401 });
@@ -115,4 +116,4 @@ export async function DELETE(request: NextRequest) {
     console.error('Error deleting account:', error);
     return NextResponse.json({ error: 'Failed to delete account' }, { status: 500 });
   }
-}
+});
