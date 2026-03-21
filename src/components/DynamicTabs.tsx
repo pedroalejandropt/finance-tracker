@@ -1,3 +1,4 @@
+import React from 'react';
 import { Button } from './ui/button';
 import { PlusIcon } from 'lucide-react';
 import { TotalSummary } from '@/components/TotalSummary';
@@ -5,6 +6,7 @@ import { StockCard } from '@/components/stock/StockCard';
 import { TabConfig, TabComponentProps } from '@/types/tab';
 import { AccountCard } from '@/components/account/AccountCard';
 import { StockDistribution } from '@/components/StockDistribution';
+import { ErrorBoundary } from '@/components/ErrorBoundary';
 
 // Componentes dinámicos para cada tab
 const OverviewTab: React.FC<TabComponentProps> = ({
@@ -93,23 +95,33 @@ const StocksTab: React.FC<TabComponentProps> = ({
   </div>
 );
 
+function withErrorBoundary(Component: React.FC<TabComponentProps>): React.FC<TabComponentProps> {
+  const WrappedComponent: React.FC<TabComponentProps> = (props) => (
+    <ErrorBoundary>
+      <Component {...props} />
+    </ErrorBoundary>
+  );
+  WrappedComponent.displayName = `WithErrorBoundary(${Component.displayName || Component.name})`;
+  return WrappedComponent;
+}
+
 // Configuración de tabs dinámica
 export const getTabConfigs = (): TabConfig[] => [
   {
     value: 'overview',
     label: 'Overview',
-    component: OverviewTab,
+    component: withErrorBoundary(OverviewTab),
   },
   {
     value: 'accounts',
     label: 'Accounts',
-    component: AccountsTab,
+    component: withErrorBoundary(AccountsTab),
     // showCondition: (props) => Boolean(props.accounts && props.accounts.length > 0)
   },
   {
     value: 'stocks',
     label: 'Stocks',
-    component: StocksTab,
+    component: withErrorBoundary(StocksTab),
     // showCondition: (props) => Boolean(props.stocks && props.stocks.length > 0)
   },
   // {
