@@ -11,16 +11,24 @@ test.describe('Dashboard', () => {
   });
 
   test('shows dashboard tabs', async ({ page }) => {
-    await expect(page.getByRole('tab', { name: /overview/i })).toBeVisible();
-    await expect(page.getByRole('tab', { name: /accounts/i })).toBeVisible();
-    await expect(page.getByRole('tab', { name: /stocks/i })).toBeVisible();
+    // Scope to the first (main navigation) tablist to avoid matching chart sub-tabs
+    const mainTabs = page.getByRole('tablist').first();
+    await expect(mainTabs.getByRole('tab', { name: /overview/i })).toBeVisible();
+    await expect(mainTabs.getByRole('tab', { name: /accounts/i })).toBeVisible();
+    await expect(mainTabs.getByRole('tab', { name: 'Stocks', exact: true })).toBeVisible();
   });
 
   test('can navigate to accounts tab', async ({ page }) => {
-    await page.getByRole('tab', { name: /accounts/i }).click();
-    await expect(page.getByRole('tab', { name: /accounts/i })).toHaveAttribute(
-      'data-state',
-      'active'
-    );
+    await page
+      .getByRole('tablist')
+      .first()
+      .getByRole('tab', { name: /accounts/i })
+      .click();
+    await expect(
+      page
+        .getByRole('tablist')
+        .first()
+        .getByRole('tab', { name: /accounts/i })
+    ).toHaveAttribute('data-state', 'active');
   });
 });
