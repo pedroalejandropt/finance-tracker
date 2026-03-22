@@ -3,6 +3,8 @@ import bcrypt from 'bcryptjs';
 import { registerSchema } from '@/lib/auth-schemas';
 import { createUser, findUserByEmail } from '@/lib/auth-dynamo';
 import { withRateLimit } from '@/lib/with-rate-limit';
+import { createVerificationToken } from '@/lib/email-verification';
+import { sendVerificationEmail } from '@/lib/mailer';
 
 const SALT_ROUNDS = 12;
 
@@ -36,6 +38,15 @@ export const POST = withRateLimit(
         passwordHash,
         createdAt: new Date().toISOString(),
       });
+
+      try {
+        const token = await createVerificationToken(email);
+        const baseUrl = process.env.NEXTAUTH_URL ?? 'http://localhost:3000';
+        const verifyUrl = `${baseUrl}/api/auth/verify-email?email=${encodeURIComponent(email)}&token=${token}`;
+        await sendVerificationEmail(email, verifyUrl);
+      } catch {
+        // Non-fatal — SMTP may not be configured
+      }
 
       return NextResponse.json({ success: true }, { status: 201 });
     } catch (error) {

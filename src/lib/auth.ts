@@ -44,10 +44,14 @@ export const authOptions: NextAuthOptions = {
         const passwordMatch = await bcrypt.compare(password, user.passwordHash);
         if (!passwordMatch) return null;
 
+        const dbUser = user as { emailVerified?: boolean } & typeof user;
+        const emailVerified = dbUser.emailVerified === false ? false : true;
+
         return {
           id: user.userId,
           email: user.email,
           name: user.name,
+          emailVerified,
         };
       },
     }),
@@ -87,12 +91,14 @@ export const authOptions: NextAuthOptions = {
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
+        token.emailVerified = (user as { emailVerified?: boolean }).emailVerified ?? true;
       }
       return token;
     },
     async session({ session, token }) {
       if (token) {
         session.user.id = token.id as string;
+        session.user.emailVerified = (token.emailVerified as boolean) ?? true;
       }
       return session;
     },
