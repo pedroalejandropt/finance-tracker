@@ -4,7 +4,7 @@ import { useState, useEffect } from 'react';
 import { Stock, Account, Transaction, Budget } from '@/types';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
-import { TrendingUpIcon } from 'lucide-react';
+import { TrendingUpIcon, XIcon } from 'lucide-react';
 import { TabComponentProps } from '@/types/tab';
 import { StockForm } from '@/components/stock/StockForm';
 import { useVisibleTabs } from '@/components/DynamicTabs';
@@ -23,8 +23,10 @@ export default function DashboardPage() {
     transactions,
     budgets,
     totals,
+    error,
     baseCurrency,
     setBaseCurrency,
+    clearError,
     addAccount,
     updateAccount,
     deleteAccount,
@@ -149,6 +151,14 @@ export default function DashboardPage() {
   return (
     status === 'authenticated' && (
       <div className="min-h-screen relative">
+        {error && (
+          <div className="flex items-center justify-between gap-3 px-4 py-3 bg-red-50 border-b border-red-200 text-red-700 text-sm">
+            <span>{error}</span>
+            <button onClick={clearError} className="flex-shrink-0 hover:opacity-70">
+              <XIcon className="h-4 w-4" />
+            </button>
+          </div>
+        )}
         <main className={`max-w-7xl mx-auto px-4 sm:px-6 lg:px-8 py-8`}>
           <ErrorBoundary>
             <Tabs value={activeTab} onValueChange={setActiveTab} className="space-y-6">

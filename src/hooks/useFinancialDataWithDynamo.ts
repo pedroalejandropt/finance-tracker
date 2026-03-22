@@ -145,29 +145,30 @@ export function useFinancialDataWithDynamo() {
     }
   }, [accounts, stocks, currencyRates, baseCurrency]); // eslint-disable-line react-hooks/exhaustive-deps
 
-  // CRUD Operations for Accounts
-  const addAccount = async (account: Omit<Account, 'accountId'>) => {
-    try {
-      const newAccount: Account = {
-        ...account,
-        accountId: Date.now().toString(),
-      };
+  const clearError = () => setError(null);
 
+  // CRUD Operations for Accounts — optimistic updates with rollback on error
+  const addAccount = async (account: Omit<Account, 'accountId'>) => {
+    const newAccount: Account = { ...account, accountId: Date.now().toString() };
+    const prev = accounts;
+    setAccounts((cur) => [...cur, newAccount]); // optimistic
+    try {
       await fetch('/api/accounts', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(newAccount),
       });
-
-      setAccounts((prev) => [...prev, newAccount]);
-    } catch (err) {
-      console.error('Error adding account:', err);
+    } catch {
+      setAccounts(prev); // rollback
+      setError('Failed to add account. Please try again.');
     }
   };
 
   const updateAccount = async (id: string, updates: Partial<Account>) => {
+    const prev = accounts;
+    setAccounts((cur) => cur.map((a) => (a.accountId === id ? { ...a, ...updates } : a))); // optimistic
     try {
-      const account = accounts.find((a) => a.accountId === id);
+      const account = prev.find((a) => a.accountId === id);
       if (account) {
         await fetch('/api/accounts', {
           method: 'POST',
@@ -175,47 +176,48 @@ export function useFinancialDataWithDynamo() {
           body: JSON.stringify({ ...account, ...updates }),
         });
       }
-
-      setAccounts((prev) =>
-        prev.map((account) => (account.accountId === id ? { ...account, ...updates } : account))
-      );
-    } catch (err) {
-      console.error('Error updating account:', err);
+    } catch {
+      setAccounts(prev); // rollback
+      setError('Failed to update account. Please try again.');
     }
   };
 
   const deleteAccount = async (id: string) => {
+    const prev = accounts;
+    setAccounts((cur) => cur.filter((a) => a.accountId !== id)); // optimistic
     try {
       await fetch('/api/accounts', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ accountId: id }),
       });
-
-      setAccounts((prev) => prev.filter((account) => account.accountId !== id));
-    } catch (err) {
-      console.error('Error deleting account:', err);
+    } catch {
+      setAccounts(prev); // rollback
+      setError('Failed to delete account. Please try again.');
     }
   };
 
-  // CRUD Operations for Stocks
+  // CRUD Operations for Stocks — optimistic updates with rollback on error
   const addStock = async (stock: Stock) => {
+    const prev = stocks;
+    setStocks((cur) => [...cur, stock]); // optimistic
     try {
       await fetch('/api/stocks', {
         method: 'POST',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify(stock),
       });
-
-      setStocks((prev) => [...prev, stock]);
-    } catch (err) {
-      console.error('Error adding stock:', err);
+    } catch {
+      setStocks(prev); // rollback
+      setError('Failed to add stock. Please try again.');
     }
   };
 
   const updateStock = async (symbol: string, updates: Partial<Stock>) => {
+    const prev = stocks;
+    setStocks((cur) => cur.map((s) => (s.symbol === symbol ? { ...s, ...updates } : s))); // optimistic
     try {
-      const stock = stocks.find((s) => s.symbol === symbol);
+      const stock = prev.find((s) => s.symbol === symbol);
       if (stock) {
         await fetch('/api/stocks', {
           method: 'POST',
@@ -223,26 +225,24 @@ export function useFinancialDataWithDynamo() {
           body: JSON.stringify({ ...stock, ...updates }),
         });
       }
-
-      setStocks((prev) =>
-        prev.map((stock) => (stock.symbol === symbol ? { ...stock, ...updates } : stock))
-      );
-    } catch (err) {
-      console.error('Error updating stock:', err);
+    } catch {
+      setStocks(prev); // rollback
+      setError('Failed to update stock. Please try again.');
     }
   };
 
   const deleteStock = async (symbol: string) => {
+    const prev = stocks;
+    setStocks((cur) => cur.filter((s) => s.symbol !== symbol)); // optimistic
     try {
       await fetch('/api/stocks', {
         method: 'DELETE',
         headers: { 'Content-Type': 'application/json' },
         body: JSON.stringify({ symbol }),
       });
-
-      setStocks((prev) => prev.filter((stock) => stock.symbol !== symbol));
-    } catch (err) {
-      console.error('Error deleting stock:', err);
+    } catch {
+      setStocks(prev); // rollback
+      setError('Failed to delete stock. Please try again.');
     }
   };
 
@@ -398,6 +398,7 @@ export function useFinancialDataWithDynamo() {
     error,
     baseCurrency,
     setBaseCurrency,
+    clearError,
 
     // Operations
     updateStockPrices,
