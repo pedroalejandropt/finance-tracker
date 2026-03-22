@@ -1,11 +1,21 @@
 import { NextAuthOptions } from 'next-auth';
 import CredentialsProvider from 'next-auth/providers/credentials';
+import GoogleProvider from 'next-auth/providers/google';
+import GithubProvider from 'next-auth/providers/github';
 import bcrypt from 'bcryptjs';
 import { loginSchema } from './auth-schemas';
 import { findUserByEmail } from './auth-dynamo';
 
 export const authOptions: NextAuthOptions = {
   providers: [
+    GoogleProvider({
+      clientId: process.env.GOOGLE_CLIENT_ID || '',
+      clientSecret: process.env.GOOGLE_CLIENT_SECRET || '',
+    }),
+    GithubProvider({
+      clientId: process.env.GITHUB_CLIENT_ID || '',
+      clientSecret: process.env.GITHUB_CLIENT_SECRET || '',
+    }),
     CredentialsProvider({
       name: 'credentials',
       credentials: {
@@ -50,6 +60,30 @@ export const authOptions: NextAuthOptions = {
     signIn: '/login',
   },
   callbacks: {
+    async signIn({ user, account }) {
+      // Only create DynamoDB record for OAuth users (not credentials)
+      if (account?.provider !== 'credentials' && user.email) {
+        if (process.env.AWS_ACCESS_KEY_ID && process.env.AWS_SECRET_ACCESS_KEY) {
+          try {
+            const { findUserByEmail: findUser, createUser } = await import('./auth-dynamo');
+            const existing = await findUser(user.email);
+            if (!existing) {
+              await createUser({
+                userId: user.email,
+                email: user.email,
+                profile: user.email,
+                name: user.name || user.email,
+                passwordHash: '', // OAuth users have no password
+                createdAt: new Date().toISOString(),
+              });
+            }
+          } catch {
+            // Non-fatal — user can still sign in even if DynamoDB write fails
+          }
+        }
+      }
+      return true;
+    },
     async jwt({ token, user }) {
       if (user) {
         token.id = user.id;
