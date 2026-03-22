@@ -1,5 +1,5 @@
 import { ReactNode } from 'react';
-import { Account, Stock, GlobalTotals, NetWorthSnapshot, Transaction } from './index';
+import { Account, Stock, GlobalTotals, NetWorthSnapshot, Transaction, Budget } from './index';
 
 export interface TabConfig {
   value: string;
@@ -26,4 +26,8 @@ export interface TabComponentProps {
   onAddTransaction?: () => void;
   onEditTransaction?: (transaction: Transaction) => void;
   onDeleteTransaction?: (transactionId: string) => void;
+  budgets?: Budget[];
+  onAddBudget?: () => void;
+  onEditBudget?: (budget: Budget) => void;
+  onDeleteBudget?: (budgetId: string) => void;
 }

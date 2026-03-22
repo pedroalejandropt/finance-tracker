@@ -75,3 +75,15 @@ export interface Transaction {
   date: string; // ISO date string YYYY-MM-DD
   createdAt?: string;
 }
+
+export type BudgetPeriod = 'monthly' | 'weekly';
+
+export interface Budget {
+  budgetId: string;
+  name: string;
+  category: string; // matches TransactionCategory values
+  limit: number;
+  currency: string;
+  period: BudgetPeriod;
+  createdAt?: string;
+}

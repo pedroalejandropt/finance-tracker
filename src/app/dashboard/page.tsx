@@ -1,7 +1,7 @@
 'use client';
 
 import { useState, useEffect } from 'react';
-import { Stock, Account, Transaction } from '@/types';
+import { Stock, Account, Transaction, Budget } from '@/types';
 import { useSession } from 'next-auth/react';
 import { useRouter } from 'next/navigation';
 import { TrendingUpIcon } from 'lucide-react';
@@ -10,6 +10,7 @@ import { StockForm } from '@/components/stock/StockForm';
 import { useVisibleTabs } from '@/components/DynamicTabs';
 import { AccountForm } from '@/components/account/AccountForm';
 import { TransactionForm } from '@/components/transaction/TransactionForm';
+import { BudgetForm } from '@/components/budget/BudgetForm';
 import { Tabs, TabsContent, TabsList, TabsTrigger } from '@/components/ui/tabs';
 import { useFinancialDataWithDynamo } from '@/hooks/useFinancialDataWithDynamo';
 import { ErrorBoundary } from '@/components/ErrorBoundary';
@@ -20,6 +21,7 @@ export default function DashboardPage() {
     stocks,
     snapshots,
     transactions,
+    budgets,
     totals,
     baseCurrency,
     setBaseCurrency,
@@ -32,6 +34,9 @@ export default function DashboardPage() {
     addTransaction,
     updateTransaction,
     deleteTransaction,
+    addBudget,
+    updateBudget,
+    deleteBudget,
   } = useFinancialDataWithDynamo();
 
   const { status } = useSession();
@@ -46,10 +51,12 @@ export default function DashboardPage() {
   const [activeTab, setActiveTab] = useState('overview');
   const [showAccountForm, setShowAccountForm] = useState(false);
   const [showStockForm, setShowStockForm] = useState(false);
+  const [showTransactionForm, setShowTransactionForm] = useState(false);
+  const [showBudgetForm, setShowBudgetForm] = useState(false);
   const [editingAccount, setEditingAccount] = useState<Account | null>(null);
   const [editingStock, setEditingStock] = useState<Stock | null>(null);
-  const [showTransactionForm, setShowTransactionForm] = useState(false);
   const [editingTransaction, setEditingTransaction] = useState<Transaction | null>(null);
+  const [editingBudget, setEditingBudget] = useState<Budget | null>(null);
 
   const handleAddAccount = () => {
     setEditingAccount(null);
@@ -99,11 +106,28 @@ export default function DashboardPage() {
     }
   };
 
+  const handleAddBudget = () => {
+    setEditingBudget(null);
+    setShowBudgetForm(true);
+  };
+
+  const handleEditBudget = (budget: Budget) => {
+    setEditingBudget(budget);
+    setShowBudgetForm(true);
+  };
+
+  const handleDeleteBudget = async (budgetId: string) => {
+    if (confirm('Are you sure you want to delete this budget?')) {
+      await deleteBudget(budgetId);
+    }
+  };
+
   const tabProps: TabComponentProps = {
     accounts,
     stocks,
     snapshots,
     transactions,
+    budgets,
     totals,
     baseCurrency,
     onCurrencyChange: setBaseCurrency,
@@ -116,6 +140,9 @@ export default function DashboardPage() {
     onAddTransaction: handleAddTransaction,
     onEditTransaction: handleEditTransaction,
     onDeleteTransaction: handleDeleteTransaction,
+    onAddBudget: handleAddBudget,
+    onEditBudget: handleEditBudget,
+    onDeleteBudget: handleDeleteBudget,
   };
   const visibleTabs = useVisibleTabs(tabProps);
 
@@ -133,7 +160,9 @@ export default function DashboardPage() {
                       ? 'grid-cols-3'
                       : visibleTabs.length === 4
                         ? 'grid-cols-4'
-                        : 'grid-cols-5'
+                        : visibleTabs.length === 5
+                          ? 'grid-cols-5'
+                          : 'grid-cols-6'
                 }`}
               >
                 {visibleTabs.map((tab) => (
@@ -161,13 +190,14 @@ export default function DashboardPage() {
         </main>
 
         {/* Forms - Centered overlay */}
-        {(showAccountForm || showStockForm || showTransactionForm) && (
+        {(showAccountForm || showStockForm || showTransactionForm || showBudgetForm) && (
           <div
             className="fixed inset-0 flex items-center justify-center z-50 w-full h-full bg-black/50"
             onClick={() => {
               setShowAccountForm(false);
               setShowStockForm(false);
               setShowTransactionForm(false);
+              setShowBudgetForm(false);
             }}
           >
             <div className="shadow-lg max-w-md w-full mx-4" onClick={(e) => e.stopPropagation()}>
@@ -214,6 +244,21 @@ export default function DashboardPage() {
                     setShowTransactionForm(false);
                   }}
                   onCancel={() => setShowTransactionForm(false)}
+                />
+              )}
+
+              {showBudgetForm && (
+                <BudgetForm
+                  budget={editingBudget || undefined}
+                  onSubmit={async (budget) => {
+                    if (editingBudget) {
+                      await updateBudget(editingBudget.budgetId, budget);
+                    } else {
+                      await addBudget(budget);
+                    }
+                    setShowBudgetForm(false);
+                  }}
+                  onCancel={() => setShowBudgetForm(false)}
                 />
               )}
             </div>

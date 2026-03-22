@@ -13,6 +13,7 @@ import { NetWorthChart } from '@/components/charts';
 import { Card, CardContent, CardHeader, CardTitle } from '@/components/ui/card';
 import { TrendingUpIcon } from 'lucide-react';
 import { TransactionList } from '@/components/transaction/TransactionList';
+import { BudgetCard } from '@/components/budget/BudgetCard';
 
 const PAGE_SIZE = 6;
 
@@ -177,6 +178,48 @@ const TransactionsTab: React.FC<TabComponentProps> = ({
   </div>
 );
 
+const BudgetsTab: React.FC<TabComponentProps> = ({
+  budgets = [],
+  onAddBudget,
+  onEditBudget,
+  onDeleteBudget,
+}) => (
+  <div className="space-y-6">
+    <div className="flex justify-between items-center">
+      <h2 className="text-xl font-semibold">Budgets</h2>
+      {onAddBudget && (
+        <Button
+          variant="outline"
+          onClick={onAddBudget}
+          className="flex items-center space-x-2 px-4 py-2 text-white rounded-lg"
+        >
+          <PlusIcon className="h-4 w-4" />
+          <span>Add Budget</span>
+        </Button>
+      )}
+    </div>
+
+    {budgets.length === 0 ? (
+      <div className="text-center py-12 text-gray-500">
+        <p className="text-lg">No budgets yet.</p>
+        <p className="text-sm mt-1">Click &quot;Add Budget&quot; to create your first budget.</p>
+      </div>
+    ) : (
+      <div className="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6">
+        {budgets.map((budget) => (
+          <BudgetCard
+            key={budget.budgetId}
+            budget={budget}
+            spent={0}
+            onEdit={onEditBudget}
+            onDelete={onDeleteBudget}
+          />
+        ))}
+      </div>
+    )}
+  </div>
+);
+
 // Configuración de tabs dinámica
 export const getTabConfigs = (): TabConfig[] => [
   {
@@ -201,12 +244,11 @@ export const getTabConfigs = (): TabConfig[] => [
     label: 'Transactions',
     component: TransactionsTab,
   },
-  // {
-  //   value: 'stock-distribution',
-  //   label: 'Stock Analysis',
-  //   component: StockAnalysisTab,
-  //   showCondition: (props) => Boolean(props.stocks && props.stocks.length > 0)
-  // }
+  {
+    value: 'budgets',
+    label: 'Budgets',
+    component: BudgetsTab,
+  },
 ];
 
 // Hook para filtrar tabs basado en condiciones
